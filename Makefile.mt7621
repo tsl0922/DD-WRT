@@ -1,0 +1,354 @@
+#
+# Broadcom Linux Router Makefile
+#
+# Copyright 2001-2003, Broadcom Corporation
+# All Rights Reserved.
+#
+# THIS SOFTWARE IS OFFERED "AS IS", AND BROADCOM GRANTS NO WARRANTIES OF ANY
+# KIND, EXPRESS OR IMPLIED, BY STATUTE, COMMUNICATION OR OTHERWISE. BROADCOM
+# SPECIFICALLY DISCLAIMS ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A SPECIFIC PURPOSE OR NONINFRINGEMENT CONCERNING THIS SOFTWARE.
+#
+# $Id: Makefile,v 1.2 2005/09/26 11:06:58 seg Exp $
+#
+
+include .config
+ifneq ($(wildcard ../cy_conf.mak),)
+  include ../cy_conf.mak
+endif
+
+#
+# Paths
+#
+OPENSER_MODULES := sl tm rr maxfwd usrloc registrar dbtext textops exec auth auth_db nathelper
+OPENSER_MODULE_FILES := $(foreach module,$(OPENSER_MODULES),openser/modules/$(module)/$(module).so)
+OPENSSL_NO_CIPHERS:= no-idea no-md2 no-mdc2 no-rc5 no-sha0 no-rmd160 no-aes192
+OPENSSL_OPTIONS:= shared no-ec no-err no-fips no-hw no-krb5 no-threads zlib-dynamic
+
+# Source bases
+
+export PLATFORM LINUXDIR LIBDIR USRLIBDIR
+export TOP := $(shell pwd)
+export SRCBASE := $(shell (cd $(TOP)/.. && pwd -P))
+
+
+# Set the HAL directory if you have the HAL sources
+
+# Set the Atheros Rate Control directory if you have the proprietary rate control
+export ATH_RATE=ath_rate/sample
+
+#
+# Cross-compile environment variables
+#
+
+# Build platform
+export BUILD := i386-pc-linux-gnu
+export HOSTCC := gcc
+
+# uClibc wrapper
+export ARCH:=$(PLATFORM)
+ifeq ($(CONFIG_UCLIBC),y)
+export PLATFORM := $(PLATFORM)-uclibc
+endif
+
+export KERNELRELEASE = $(shell cat $(LINUXDIR)/include/config/kernel.release 2> /dev/null)
+export CROSS_COMPILE := $(ARCH)-linux-uclibc-
+export CONFIGURE := ./configure $(ARCH)-linux --build=$(BUILD)
+export TOOLCHAIN := $(shell cd $(dir $(shell which $(CROSS_COMPILE)gcc))/.. && pwd -P)
+
+export BASEOPT:=-Os -fno-unwind-tables -fno-asynchronous-unwind-tables
+export COPTS:=$(BASEOPT) -pipe -mips32r2 -mtune=1004kc -mllsc -fno-caller-saves -mno-branch-likely -fno-plt -fcommon
+
+export CC := ccache $(CROSS_COMPILE)gcc
+export CXX := ccache $(CROSS_COMPILE)g++
+export AR := $(CROSS_COMPILE)ar
+export AS := $(CROSS_COMPILE)as
+export LD := $(CROSS_COMPILE)ld
+export NM := $(CROSS_COMPILE)nm
+export RANLIB := $(CROSS_COMPILE)ranlib
+export STRIP := $(CROSS_COMPILE)strip
+export SIZE := $(CROSS_COMPILE)size
+export MIPS16_OPT:= -minterlink-mips16 -mips16
+
+export CFLAGS := $(COPTS)
+
+#
+# Install and target directories
+#
+
+export PLATFORMDIR := $(TOP)/$(PLATFORM)
+export INSTALLDIR := $(PLATFORMDIR)/install
+export TARGETDIR := $(PLATFORMDIR)/target
+
+ifeq ($(PLATFORM),mipsel)
+obj-y += libcrypto
+endif
+#
+# Configuration
+#
+CONFIG_IPTABLES=y
+
+include rules/configs.mk
+
+obj-clean := $(foreach obj,$(obj-y) $(obj-n),$(obj)-clean)
+obj-install := $(foreach obj,$(obj-y),$(obj)-install)
+obj-distclean := $(foreach obj,$(obj-y) $(obj-n),$(obj)-distclean)
+
+SVN=svn
+SVN_REVISION=$(shell svn info | grep Revision | awk '{print $$2}')
+
+all: install_headers build_date clean_target $(obj-y) kernel
+
+build_date:
+	echo "#define BUILD_DATE \"$(shell date +%D)\"" > ../../opt/build.h 
+	echo "CONFIG_MUSL=y" >> .config 
+
+gen_revision:
+	echo -n '#define SVN_REVISION "$(SVN_REVISION)"' > shared/revision.h
+
+include kernel-features.mk
+
+define Download
+  $(1)-download:
+	@if [ -d $(1) ]; then \
+		echo "== Updating $(1)"; \
+		$(SVN) up $(1) --set-depth infinity --quiet; \
+	fi
+endef
+
+obj-deps=$(foreach obj,$(obj-y), \
+	$(shell grep '^$(obj):' rules/*.mk | awk -F: '{print $$3}' | sed 's/\$$\(.\+\)//g' || true))
+obj-download=$(sort $(obj-deps) $(obj-y))
+
+$(foreach obj,$(obj-download),$(eval $(call Download,$(obj))))
+
+download: $(patsubst %,%-download,$(obj-download)) kernel-download
+
+kernel-download:
+	@ if [ ! -d $(LINUXDIR) ]; then \
+		echo "== Updating linux-$(KERNELVERSION)"; \
+		$(SVN) up $(LINUXDIR) --set-depth infinity --quiet; \
+	fi
+
+kernel:
+	$(kernelfeatures)
+	$(MAKE) -C $(LINUXDIR) olddefconfig
+
+	if ! grep -q "CONFIG_EMBEDDED_RAMDISK=y" $(LINUXDIR)/.config ; then \
+	    $(MAKE) -j 4 -C $(LINUXDIR) vmlinux CROSS_COMPILE="ccache $(CROSS_COMPILE)" ARCH=mips ; \
+	fi
+	if grep -q "CONFIG_MODULES=y" $(LINUXDIR)/.config ; then \
+	    $(MAKE) -j 4 -C $(LINUXDIR) modules CROSS_COMPILE="ccache $(CROSS_COMPILE)" ARCH=mips ; \
+	fi
+
+	$(MAKE) -C $(LINUXDIR) modules_install DEPMOD=/bin/true INSTALL_MOD_PATH=$(TARGETDIR)
+ifeq ($(CONFIG_MT76),y)
+	-$(MAKE) -f Makefile.mt7621 ath9k
+	-$(MAKE) -f Makefile.mt7621 ath9k-install
+endif
+	-$(MAKE) -f Makefile.mt7621 libutils
+ifeq ($(CONFIG_NTFS3G),y)
+	-$(MAKE) -f Makefile.mt7621 ntfs3
+	-$(MAKE) -f Makefile.mt7621 ntfs3-install
+endif
+ifeq ($(CONFIG_BATMANADV),y)
+	-$(MAKE) -f Makefile.mt7621 batman-adv
+	-$(MAKE) -f Makefile.mt7621 batman-adv-install
+endif
+ifeq ($(CONFIG_OPENDPI),y)
+	-$(MAKE) -f Makefile.mt7621 ndpi-netfilter
+	-$(MAKE) -f Makefile.mt7621 ndpi-netfilter-install
+endif
+ifeq ($(CONFIG_ZFS),y)
+	-$(MAKE) -f Makefile.mt7621 zfs
+	-$(MAKE) -f Makefile.mt7621 zfs-install
+endif
+ifeq ($(CONFIG_SMBD),y)
+	-$(MAKE) -f Makefile.mt7621 smbd
+	-$(MAKE) -f Makefile.mt7621 smbd-install
+endif
+ifeq ($(CONFIG_WIREGUARD),y)
+	-$(MAKE) -f Makefile.mt7621 wireguard
+	-$(MAKE) -f Makefile.mt7621 wireguard-install
+endif
+ifeq ($(CONFIG_CAKE),y)
+	-$(MAKE) -f Makefile.mt7621 cake
+	-$(MAKE) -f Makefile.mt7621 cake-install
+	-$(MAKE) -f Makefile.mt7621 fq_codel_fast
+	-$(MAKE) -f Makefile.mt7621 fq_codel_fast-install
+endif
+	-$(MAKE) -f Makefile.mt7621 uniwip-gpio
+	-$(MAKE) -f Makefile.mt7621 uniwip-gpio-install
+
+	rm -f $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/build
+	rm -f $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/source
+
+ifneq ($(CONFIG_SAMBA),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/cifs
+endif
+ifneq ($(CONFIG_JFFS2),y)
+ifneq ($(CONFIG_MT7620),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/jffs2
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/lib/lzma
+endif
+endif
+ifneq ($(CONFIG_IPV6),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/net/ipv6
+endif
+ifneq ($(CONFIG_BONDING),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/drivers/net/bonding
+endif
+ifneq ($(CONFIG_USBIP),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/drivers/staging/usbip
+endif
+ifneq ($(CONFIG_USB),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/ext2
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/ext3
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/xfs
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/jbd
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/fat
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/vfat
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/msdos
+	rm -f $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/mbcache.ko
+endif
+ifneq ($(CONFIG_USB_ADVANCED),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/ext3
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/ext4
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/xfs
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/btrfs
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/jbd	
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/jbd2	
+endif
+ifeq ($(CONFIG_3G_ONLY),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs
+endif
+
+	$(CROSS_COMPILE)cpp -nostdinc -x assembler-with-cpp -undef -D__DTS__ \
+		-I$(LINUXDIR)/arch/mips/boot/dts \
+		-I$(LINUXDIR)/arch/mips/boot/dts/include \
+		-I$(LINUXDIR)/include \
+		-o $(LINUXDIR)/dts/K2P.dtb.tmp \
+		$(LINUXDIR)/dts/K2P.dts
+	$(LINUXDIR)/scripts/dtc/dtc -i $(LINUXDIR)/dts/ -O dtb -o $(LINUXDIR)/dts/K2P.dtb $(LINUXDIR)/dts/K2P.dtb.tmp
+
+	cp $(LINUXDIR)/vmlinux $(LINUXDIR)/vmlinux-mt7621-K2P
+	patch-dtb $(LINUXDIR)/vmlinux-mt7621-K2P $(LINUXDIR)/dts/K2P.dtb
+
+include common.mk
+
+install package: clean_target $(filter-out lib.$(ARCH)-install,$(obj-install))
+	install -d $(TARGETDIR)
+	for dir in $(wildcard $(patsubst %,$(INSTALLDIR)/%,$(obj-y))) ; do \
+	    (cd $${dir} && tar cpf - .) | (cd $(TARGETDIR) && tar xpf -) \
+	done
+	mkdir -p $(PLATFORMDIR)/target/etc/config
+	mkdir -p $(PLATFORMDIR)/target/etc/kaid
+	mkdir -p $(PLATFORMDIR)/target/etc/langpack
+	cd  $(PLATFORMDIR)/target/lib
+	cp ./opt/etc/preinit $(PLATFORMDIR)/target/etc
+	cp ./opt/etc/postinit $(PLATFORMDIR)/target/etc
+	cp ./opt/etc/config/* $(PLATFORMDIR)/target/etc/config
+	cp ./opt/usr/lib/smb.conf $(PLATFORMDIR)/target/usr/lib
+	ln -sf ../tmp/smbshare $(PLATFORMDIR)/target/www/smb
+	$(MAKE) -f Makefile.mt7621 optimize-lib
+	if grep -q "CONFIG_MODULES=y" $(LINUXDIR)/.config ; then \
+	    $(MAKE) -C $(LINUXDIR) modules_install DEPMOD=/bin/true INSTALL_MOD_PATH=$(TARGETDIR) ; \
+	fi
+ifeq ($(CONFIG_MADWIFI),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/drivers/net/wl
+endif
+ifeq ($(CONFIG_WAVESAT),y)
+	make -f Makefile.mt7621 wavesat-install
+endif
+	find $(TARGETDIR) -name "wl_*.o"  | xargs rm -rf
+ifneq ($(CONFIG_SAMBA),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/cifs
+endif
+	rm -f $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/build
+	rm -f $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/source
+	cd $(TARGETDIR) && $(TOP)/misc/rootprep.sh
+	cd $(TARGETDIR)  &&  find . -iname "CVS" | xargs rm -rf
+	cd $(TARGETDIR)  &&  find . -iname ".svn" | xargs rm -rf
+	rm -rf $(TARGETDIR)/usr/local
+	rm -f $(TARGETDIR)/usr/lib/smb.conf
+ifeq ($(CONFIG_KAID),y)
+	cp kaid/kaid $(TARGETDIR)/usr/sbin
+endif
+	cd $(TARGETDIR) && find . -name *.ko -exec mipsel-linux-strip --strip-unneeded --remove-section=.comment {} +
+ifneq ($(CONFIG_SAMBA),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/cifs
+endif
+ifneq ($(CONFIG_JFFS2),y)
+ifneq ($(CONFIG_MT7620),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/jffs2
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/lib/lzma
+endif
+endif
+ifneq ($(CONFIG_IPV6),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/net/ipv6
+endif
+ifneq ($(CONFIG_BONDING),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/drivers/net/bonding
+endif
+ifneq ($(CONFIG_USBIP),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/drivers/staging/usbip
+endif
+ifneq ($(CONFIG_USB),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/ext2
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/ext3
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/xfs
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/jbd
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/fat
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/vfat
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/msdos
+	rm -f $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/mbcache.ko
+endif
+ifneq ($(CONFIG_USB_ADVANCED),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/ext3
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/ext4
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/xfs
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/btrfs
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/jbd	
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs/jbd2	
+endif
+ifeq ($(CONFIG_3G_ONLY),y)
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel/fs
+endif
+	find $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel -name *.ko -exec mv {} $(TARGETDIR)/lib/modules/$(KERNELRELEASE) \;
+	-find $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/net -name *.ko -exec mv {} $(TARGETDIR)/lib/modules/$(KERNELRELEASE) \;
+	-find $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/extra -name *.ko -exec mv {} $(TARGETDIR)/lib/modules/$(KERNELRELEASE) \;
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/kernel
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/net
+	rm -rf $(TARGETDIR)/lib/modules/$(KERNELRELEASE)/extra
+	./busybox/examples/depmod.pl -F $(LINUXDIR)/System.map -b $(PLATFORMDIR)/target/lib/modules
+
+	export STRIP_KMOD="$(LINUXDIR)/scripts/strip-kmod.sh" && \
+	export NO_RENAME=1 && \
+	export STRIP="sstrip" && \
+	$(LINUXDIR)/scripts/rstrip.sh $(TARGETDIR)
+
+	$(TOP)/../../tools/removewhitespace.sh $(TOP)/../../tools $(TARGETDIR)/etc/config
+	$(LINUXDIR)/scripts/squashfs/mksquashfs4 \
+		$(PLATFORMDIR)/target $(PLATFORMDIR)/root.fs \
+		-comp xz -Xpreset 9 -Xe -Xlc 0 -Xlp 2 -Xpb 2 \
+		-root-owned -noappend -nopad -noI -no-xattrs -b 1M
+
+image:
+	$(CROSS_COMPILE)objcopy -O binary $(LINUXDIR)/vmlinux-mt7621-K2P $(PLATFORMDIR)/vmlinux.bin
+	lzma e -lc1 -lp2 -pb2 -d25 $(PLATFORMDIR)/vmlinux.bin $(PLATFORMDIR)/vmlinux.lzma
+	make -C lzma-loader/mt7621 clean
+	make -C lzma-loader/mt7621 LOADER_DATA=$(PLATFORMDIR)/vmlinux.lzma
+	@cd $(PLATFORMDIR); \
+		ENTRY=`readelf -h $(TOP)/lzma-loader/mt7621/loader.elf | grep "Entry" | awk '{print $$4}'`; \
+		mkimage -A mips -O linux -C none -T kernel \
+			-a 80001000 -e $$ENTRY -n "DIR_878_MT7621AT" \
+			-d $(TOP)/lzma-loader/mt7621/loader.bin root-mt7621_K2P.uimage; \
+		dd if=root-mt7621_K2P.uimage of=aligned-mt7621_K2P.uimage bs=64k conv=sync; \
+		cat root.fs >> aligned-mt7621_K2P.uimage; \
+		mv aligned-mt7621_K2P.uimage dd-wrt-v3.0-r$(SVN_REVISION)-k2p.bin
+
+include rules/all.mk
+
+.PHONY: all clean distclean mrproper install package
+.PHONY: conf mconf oldconf kconf kmconf config menuconfig oldconfig
+.PHONY: dummy fixkc libnet libpcap libffi

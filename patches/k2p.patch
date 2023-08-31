@@ -1,0 +1,73 @@
+Index: src/router/libutils/libutils/detect.c
+===================================================================
+--- src/router/libutils/libutils/detect.c	(revision 53464)
++++ src/router/libutils/libutils/detect.c	(working copy)
+@@ -1101,7 +1101,7 @@
+ 			return ROUTER_DIR882;
+ 		}
+ 		if (!memcmp(sign, "DIR_878", 7)) {
+-			setRouter("Dlink DIR-878 R1");
++			setRouter("Phicomm K2P");
+ 			return ROUTER_DIR882;
+ 		}
+ 	}
+Index: src/router/libutils/libutils/gpio.c
+===================================================================
+--- src/router/libutils/libutils/gpio.c	(revision 53464)
++++ src/router/libutils/libutils/gpio.c	(working copy)
+@@ -1116,6 +1116,25 @@
+ 
+ void set_gpio(int pin, int value)
+ {
++	if (pin == 13) {
++		writeint("/sys/class/leds/red:status/brightness", value);
++		writeint("/sys/class/leds/yellow:status/brightness", !value);
++		writeint("/sys/class/leds/blue:status/brightness", 0);
++		return;
++	}
++	if (pin == 14) {
++		writeint("/sys/class/leds/red:status/brightness", !value);
++		writeint("/sys/class/leds/yellow:status/brightness", value);
++		writeint("/sys/class/leds/blue:status/brightness", 0);
++		return;
++	}
++	if (pin == 15) {
++		writeint("/sys/class/leds/red:status/brightness", 0);
++		writeint("/sys/class/leds/yellow:status/brightness", !value);
++		writeint("/sys/class/leds/blue:status/brightness", value);
++		return;
++	}
++
+ 	if (pin > 95) {
+ 		set_linux_gpio(pin, value);
+ 	} else {
+@@ -1126,6 +1145,9 @@
+ 
+ int get_gpio(int pin)
+ {
++	if (pin >= 13 && pin <= 15)
++		return 0;
++
+ 	int value;
+ 	if (pin > 95)
+ 		get_linux_gpio(pin);
+Index: src/router/libutils/libutils/ledconfig.c
+===================================================================
+--- src/router/libutils/libutils/ledconfig.c	(revision 53464)
++++ src/router/libutils/libutils/ledconfig.c	(working copy)
+@@ -598,12 +598,9 @@
+ 		cfg->usb_power = 0xa;
+ 		break;
+ 	case ROUTER_DIR882:
+-		cfg->connected_gpio = GPIO_LOW | 0x3;
+-		cfg->disconnected_gpio = GPIO_LOW | 0x4;
+-		cfg->diag_gpio = GPIO_LOW | 0x8;
+-		cfg->power_gpio = GPIO_LOW | 0x10;
+-		cfg->usb_gpio = GPIO_LOW | 0xc;
+-		cfg->usb_gpio1 = GPIO_LOW | 0xe;
++		cfg->connected_gpio = 0xf;
++		cfg->power_gpio = GPIO_LOW | 0xd;
++		cfg->wlan_gpio = 0xe;
+ 		break;
+ 	case ROUTER_DIR860LB1:
+ 		cfg->power_gpio = GPIO_LOW | 0xf;

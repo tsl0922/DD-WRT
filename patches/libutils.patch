@@ -1,0 +1,28 @@
+Index: src/router/libutils/Makefile
+===================================================================
+--- src/router/libutils/Makefile	(revision 53457)
++++ src/router/libutils/Makefile	(working copy)
+@@ -157,9 +157,9 @@
+ OBJS += $(TOP)/register/register_regulatory.o
+ endif
+ ifeq ($(CONFIG_MADWIFI),y)
+-SHOBJS += $(TOP)/register/register_check.o
+-WOBJS += $(TOP)/register/register_wifi.o
+-OBJS += $(TOP)/register/register_regulatory.o
++# SHOBJS += $(TOP)/register/register_check.o
++# WOBJS += $(TOP)/register/register_wifi.o
++# OBJS += $(TOP)/register/register_regulatory.o
+ endif
+ ifeq ($(CONFIG_IPV6),y)
+ #OBJS += libutils/getifaddrs.o
+Index: src/router/libutils/libshutils/shutils.c
+===================================================================
+--- src/router/libutils/libshutils/shutils.c	(revision 53457)
++++ src/router/libutils/libshutils/shutils.c	(working copy)
+@@ -1784,3 +1784,6 @@
+ }
+ 
+ #endif
++char *hostapd_eap_get_types (void) { return ""; }
++void adjust_regulatory (int count) {}
++int registered_has_subquarter (void) {return 0;}

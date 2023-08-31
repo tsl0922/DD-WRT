@@ -1,0 +1,13 @@
+Index: src/router/olsrd/src/cfgparser/local.mk
+===================================================================
+--- src/router/olsrd/src/cfgparser/local.mk	(revision 53464)
++++ src/router/olsrd/src/cfgparser/local.mk	(working copy)
+@@ -76,7 +76,7 @@
+ endif
+ 	$(MAKECMDPREFIX)$(BISON) -d -o "$@-tmp" "$<"
+ 	$(MAKECMDPREFIX)sed	-e 's/register //' \
+-		-e '/^#line/s/$(call quote,$@-tmp)/$(call quote,$@)/' \
++		-e 's/oparse\.h-tmp/oparse\.h/' \
+ 		< "$@-tmp" >"$@"
+ 	$(MAKECMDPREFIX)mv "$(subst .c,.h,$@-tmp)" "$(subst .c,.h,$@)"
+ 	$(MAKECMDPREFIX)$(RM) "$@-tmp" "$(subst .c,.h,$@-tmp)"

@@ -1,0 +1,35 @@
+Index: src/router/others/Makefile
+===================================================================
+--- src/router/others/Makefile	(revision 53464)
++++ src/router/others/Makefile	(working copy)
+@@ -61,28 +61,10 @@
+ 	install -d $(INSTALLDIR)/etc/cfe
+ 	install cfe/cfe_600.bin $(INSTALLDIR)/etc/cfe
+ endif
+-ifdef CONFIG_MT7612
+-	install -d $(INSTALLDIR)/etc/wlan
+-	install rt2880/SingleSKU.dat $(INSTALLDIR)/etc/wlan
+-endif
+-ifdef CONFIG_MT7615
+-	install -d $(INSTALLDIR)/etc/wlan/
+-	cp rt2880/mt7615/*.dat $(INSTALLDIR)/etc/wlan
+-	install rt2880/MT7615*.bin $(INSTALLDIR)/etc/wlan
+-endif
+-ifdef CONFIG_RT3052
+-	install -d $(INSTALLDIR)/etc/wlan
+-	install rt2880/RT30*.bin $(INSTALLDIR)/etc/wlan
+-	install rt2880/RT33*.bin $(INSTALLDIR)/etc/wlan
+-	install rt2880/RT36*.bin $(INSTALLDIR)/etc/wlan
+-	install rt2880/RT38*.bin $(INSTALLDIR)/etc/wlan
+-	install rt2880/MT76*.BIN $(INSTALLDIR)/etc/wlan
+-else
+ ifdef CONFIG_RT2880
+-	install -d $(INSTALLDIR)/etc/wlan
+-	install rt2880/RT28*.bin $(INSTALLDIR)/etc/wlan
++	install -d $(INSTALLDIR)/etc_ro/Wireless
++	install rt2880/mt7615/*.dat $(INSTALLDIR)/etc_ro/Wireless
+ endif
+-endif
+ ifdef CONFIG_X86
+ 	install -d $(INSTALLDIR)/boot
+ endif

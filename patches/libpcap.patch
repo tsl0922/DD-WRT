@@ -1,0 +1,12 @@
+Index: src/router/libpcap/gencode.c
+===================================================================
+--- src/router/libpcap/gencode.c	(revision 53464)
++++ src/router/libpcap/gencode.c	(working copy)
+@@ -65,6 +65,7 @@
+ #include "arcnet.h"
+ #include "diag-control.h"
+ 
++#include "grammar.h"
+ #include "scanner.h"
+ 
+ #if defined(linux)

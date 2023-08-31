@@ -1,0 +1,14 @@
+Index: src/linux/universal/linux-4.14/net/wireless/wext-core.c
+===================================================================
+--- src/linux/universal/linux-4.14/net/wireless/wext-core.c	(revision 53464)
++++ src/linux/universal/linux-4.14/net/wireless/wext-core.c	(working copy)
+@@ -964,6 +964,9 @@
+ 		else if (private)
+ 			return private(dev, iwr, cmd, info, handler);
+ 	}
++	/* Old driver API : call driver ioctl handler */
++	if (dev->netdev_ops->ndo_do_ioctl)
++		return dev->netdev_ops->ndo_do_ioctl(dev, (struct ifreq *)iwr, cmd);
+ 	return -EOPNOTSUPP;
+ }
+ 

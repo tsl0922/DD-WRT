@@ -1,0 +1,66 @@
+Index: src/router/vpnc/libgpg-error/src/Makefile.am
+===================================================================
+--- src/router/vpnc/libgpg-error/src/Makefile.am	(revision 53464)
++++ src/router/vpnc/libgpg-error/src/Makefile.am	(working copy)
+@@ -134,7 +134,7 @@
+ 
+ errnos-sym.h: Makefile mkstrtable.awk errnos.in
+ 	$(AWK) -f $(srcdir)/mkstrtable.awk -v textidx=2 -v nogettext=1 \
+-		-v prefix=GPG_ERR_ -v namespace=errnos_ \
++		-v prefix=GPG_ERR_ -v pkg_namespace=errnos_ \
+ 		$(srcdir)/errnos.in >$@
+ 
+ gpg-error.h: Makefile mkheader.awk \
+Index: src/router/vpnc/libgpg-error/src/Makefile.in
+===================================================================
+--- src/router/vpnc/libgpg-error/src/Makefile.in	(revision 53464)
++++ src/router/vpnc/libgpg-error/src/Makefile.in	(working copy)
+@@ -846,7 +846,7 @@
+ 
+ errnos-sym.h: Makefile mkstrtable.awk errnos.in
+ 	$(AWK) -f $(srcdir)/mkstrtable.awk -v textidx=2 -v nogettext=1 \
+-		-v prefix=GPG_ERR_ -v namespace=errnos_ \
++		-v prefix=GPG_ERR_ -v pkg_namespace=errnos_ \
+ 		$(srcdir)/errnos.in >$@
+ 
+ gpg-error.h: Makefile mkheader.awk \
+Index: src/router/vpnc/libgpg-error/src/mkstrtable.awk
+===================================================================
+--- src/router/vpnc/libgpg-error/src/mkstrtable.awk	(revision 53464)
++++ src/router/vpnc/libgpg-error/src/mkstrtable.awk	(working copy)
+@@ -77,7 +77,7 @@
+ #
+ # The variable prefix can be used to prepend a string to each message.
+ #
+-# The variable namespace can be used to prepend a string to each
++# The variable pkg_namespace can be used to prepend a string to each
+ # variable and macro name.
+ 
+ BEGIN {
+@@ -102,7 +102,7 @@
+       print "/* The purpose of this complex string table is to produce";
+       print "   optimal code with a minimum of relocations.  */";
+       print "";
+-      print "static const char " namespace "msgstr[] = ";
++      print "static const char " pkg_namespace "msgstr[] = ";
+       header = 0;
+     }
+   else
+@@ -150,7 +150,7 @@
+   else
+     print "  gettext_noop (\"" prefix last_msgstr "\");";
+   print "";
+-  print "static const int " namespace "msgidx[] =";
++  print "static const int " pkg_namespace "msgidx[] =";
+   print "  {";
+   for (i = 0; i < coded_msgs; i++)
+     print "    " pos[i] ",";
+@@ -157,7 +157,7 @@
+   print "    " pos[coded_msgs];
+   print "  };";
+   print "";
+-  print "#define " namespace "msgidxof(code) (0 ? -1 \\";
++  print "#define " pkg_namespace "msgidxof(code) (0 ? -1 \\";
+ 
+ # Gather the ranges.
+   skip = code[0];

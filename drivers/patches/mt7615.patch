@@ -1,0 +1,181 @@
+Index: src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882
+===================================================================
+--- src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882	(revision 53464)
++++ src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882	(working copy)
+@@ -33,6 +33,146 @@
+ source "drivers/net/wireless/ti/Kconfig"
+ source "drivers/net/wireless/zydas/Kconfig"
+ 
++menuconfig WIFI_DRIVER
++	bool "WiFi Driver Support"
++
++if WIFI_DRIVER
++
++choice
++	prompt "Choose First WiFi Interface"
++
++	config FIRST_IF_NONE
++	bool "None"
++	
++	config FIRST_IF_MT7615E
++	bool "MT7615E"
++	select WIFI_MT_MAC
++	select MT_MAC
++
++endchoice
++
++choice
++	prompt "Choose Second WiFi Interface"
++	config SECOND_IF_NONE
++	bool "None"
++
++	config SECOND_IF_MT7615E
++	bool "MT7615E"
++	select WIFI_MT_MAC
++	select MULTI_INF_SUPPORT
++
++endchoice
++
++choice
++	prompt "Choose Third WiFi Interface"
++	config THIRD_IF_NONE
++	bool "None"
++
++	config THIRD_IF_MT7615E
++	bool "MT7615E"
++	select WIFI_MT_MAC
++	select MULTI_INF_SUPPORT
++
++endchoice
++
++config RT_FIRST_CARD
++	int
++	depends on !FIRST_IF_NONE
++	default 7615 if FIRST_IF_MT7615E
++
++config RT_SECOND_CARD
++	int
++	depends on !SECOND_IF_NONE
++	default 7615 if SECOND_IF_MT7615E
++
++config RT_THIRD_CARD
++	int
++	depends on !THIRD_IF_NONE
++	default 7615 if THIRD_IF_MT7615E
++
++config RT_FIRST_IF_RF_OFFSET
++	hex
++	depends on !FIRST_IF_NONE
++	default 0x0
++
++config RT_SECOND_IF_RF_OFFSET
++	hex
++	depends on !SECOND_IF_NONE
++	default 0x8000
++
++config RT_THIRD_IF_RF_OFFSET
++	hex
++	depends on !THIRD_IF_NONE
++	default 0x10000
++
++if (FIRST_IF_MT7615E || SECOND_IF_MT7615E)
++menu "MT7615 common configs"
++
++choice
++	prompt "PA LNA Type of 1st Card"
++	depends on ! FIRST_IF_NONE
++
++	config FIRST_IF_EPAELNA
++	bool "ePAeLNA"
++	config FIRST_IF_IPAILNA
++	bool "iPAiLNA"		
++	config FIRST_IF_IPAELNA
++	bool "iPAeLNA"
++endchoice
++
++choice
++	prompt "PA LNA Type of 2nd Card"
++	depends on ! SECOND_IF_NONE
++
++	config SECOND_IF_EPAELNA
++	bool "ePAeLNA"
++	config SECOND_IF_IPAILNA
++	bool "iPAiLNA"		
++	config SECOND_IF_IPAELNA
++	bool "iPAeLNA"
++endchoice
++
++choice
++	prompt "PA LNA Type of 3rd Card"
++	depends on ! THIRD_IF_NONE
++
++	config THIRD_IF_EPAELNA
++	bool "ePAeLNA"
++	config THIRD_IF_IPAILNA
++	bool "iPAiLNA"		
++	config THIRD_IF_IPAELNA
++	bool "iPAeLNA"
++endchoice
++
++choice
++	prompt "Main Mode"
++	default WIFI_MODE_AP
++
++	config WIFI_MODE_AP
++	tristate "AP"
++	select MT_AP_SUPPORT
++
++	config WIFI_MODE_STA
++	tristate "STA"
++	select MT_STA_SUPPORT
++
++	config WIFI_MODE_BOTH
++	tristate "APSTA"
++	select MT_AP_SUPPORT
++	select MT_STA_SUPPORT
++endchoice
++endmenu
++endif
++
++
++if (FIRST_IF_MT7615E || SECOND_IF_MT7615E)
++menu "MediaTek MT7615E PCIe Wireless driver"
++source "drivers/net/wireless/rt7615/mt_wifi/embedded/Kconfig"
++endmenu
++endif
++
++endif # WIFI_DRIVER
++
+ config PCMCIA_RAYCS
+ 	tristate "Aviator/Raytheon 2.4GHz wireless support"
+ 	depends on PCMCIA
+Index: src/linux/universal/linux-4.14/drivers/net/wireless/Makefile
+===================================================================
+--- src/linux/universal/linux-4.14/drivers/net/wireless/Makefile	(revision 53464)
++++ src/linux/universal/linux-4.14/drivers/net/wireless/Makefile	(working copy)
+@@ -14,21 +14,11 @@
+ obj-$(CONFIG_WLAN_VENDOR_MEDIATEK) += mediatek/
+ obj-$(CONFIG_WLAN_VENDOR_RALINK) += ralink/
+ obj-$(CONFIG_WLAN_VENDOR_REALTEK) += realtek/
+-ifeq ($(CONFIG_RALINK_DEVICE),y)
+-obj-$(CONFIG_RT2860V2_AP)       += rt3352/rt2860v2_ap/
+-obj-$(CONFIG_RT2860V2_STA)      += rt3352/rt2860v2_sta/
+-endif
+-ifeq ($(CONFIG_SOC_MT7620),y)
+-obj-$(CONFIG_RT2860V2_AP)       += rt7620/rt2860v2_ap/
+-obj-$(CONFIG_RT2860V2_STA)      += rt7620/rt2860v2_sta/
+-obj-$(CONFIG_RTPCI_AP)      += rt5592/
+-obj-$(CONFIG_RLT_AP_SUPPORT)      += rt7612/rlt_wifi_ap/
+-obj-$(CONFIG_MT7610_AP)      += rt7610/
+-endif
+-ifeq ($(CONFIG_SOC_MT7621),y)
+-obj-$(CONFIG_RLT_AP_SUPPORT)      += rt7612/rlt_wifi_ap/
++
++# Add wifi-utility And always build-in
++obj-y += wifi_utility/
+ obj-$(CONFIG_MT_AP_SUPPORT)      += rt7615/mt_wifi_ap/
+-endif
++
+ obj-$(CONFIG_WLAN_VENDOR_RSI) += rsi/
+ obj-$(CONFIG_WLAN_VENDOR_ST) += st/
+ obj-$(CONFIG_WLAN_VENDOR_TI) += ti/

@@ -1,0 +1,23 @@
+Index: src/router/mac80211/drivers/net/wireless/Kconfig
+===================================================================
+--- src/router/mac80211/drivers/net/wireless/Kconfig	(revision 53457)
++++ src/router/mac80211/drivers/net/wireless/Kconfig	(working copy)
+@@ -19,7 +19,7 @@
+ if WLAN
+ 
+ source "drivers/net/wireless/admtek/Kconfig"
+-source "drivers/net/wireless/ath/Kconfig"
++# source "drivers/net/wireless/ath/Kconfig"
+ source "drivers/net/wireless/atmel/Kconfig"
+ source "drivers/net/wireless/broadcom/Kconfig"
+ #source "drivers/net/wireless/cisco/Kconfig"
+Index: src/router/mac80211/drivers/net/wireless/mediatek/mt76/Kconfig
+===================================================================
+--- src/router/mac80211/drivers/net/wireless/mediatek/mt76/Kconfig	(revision 53457)
++++ src/router/mac80211/drivers/net/wireless/mediatek/mt76/Kconfig	(working copy)
+@@ -40,4 +40,4 @@
+ source "drivers/net/wireless/mediatek/mt76/mt7615/Kconfig"
+ source "drivers/net/wireless/mediatek/mt76/mt7915/Kconfig"
+ source "drivers/net/wireless/mediatek/mt76/mt7921/Kconfig"
+-source "drivers/net/wireless/mediatek/mt76/mt7996/Kconfig"
++# source "drivers/net/wireless/mediatek/mt76/mt7996/Kconfig"

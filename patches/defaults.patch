@@ -1,0 +1,85 @@
+Index: src/router/services/sysinit/defaults.c
+===================================================================
+--- src/router/services/sysinit/defaults.c	(revision 53464)
++++ src/router/services/sysinit/defaults.c	(working copy)
+@@ -138,7 +138,7 @@
+ #elif HAVE_CARLSONWIRELESS
+ 	{ "time_zone", "Etc/Zulu" },
+ #else
+-	{ "time_zone", "Europe/Berlin" },
++	{ "time_zone", "Asia/Shanghai" },
+ #endif
+ #ifdef HAVE_SKYTRON
+ 	{ "ntp_server", "ntp0.fau.de" },	/* NTP server *//* Modify */
+@@ -299,7 +299,7 @@
+ #endif
+ 	{ "lan_proto", "static" },
+ #else
+-	{ "lan_ipaddr", "192.168.1.1" },	/* LAN IP address */
++	{ "lan_ipaddr", "192.168.2.1" },	/* LAN IP address */
+ #endif
+ 	{ "lan_netmask", "255.255.255.0" },	/* LAN netmask */
+ 	{ "lan_gateway", "0.0.0.0" },	/* LAN gateway */
+@@ -703,7 +703,7 @@
+ #elif HAVE_NDTRADE
+ 	{ "dhcp_start", "192.168.100.30" },	/* First assignable DHCP address */
+ #else
+-	{ "dhcp_start", "192.168.1.64" },	/* First assignable DHCP address */
++	{ "dhcp_start", "192.168.2.64" },	/* First assignable DHCP address */
+ #endif
+ 	// { "dhcp_end", "150", 0 }, /* Last assignable DHCP address */ /* Remove 
+ 	// 
+@@ -2332,7 +2332,7 @@
+ #elif defined(HAVE_NDTRADE)
+ 	{ "telnetd_enable", "0" },
+ #else
+-	{ "telnetd_enable", "1" },
++	{ "telnetd_enable", "0" },
+ #endif
+ #ifdef HAVE_IPV6
+ 	{ "ipv6_enable", "0" },
+@@ -2422,7 +2422,7 @@
+ #elif HAVE_IDEXX
+ 	{ "sshd_enable", "1" },
+ #else
+-	{ "sshd_enable", "0" },
++	{ "sshd_enable", "1" },
+ #endif
+ 	{ "sshd_forwarding", "0" },
+ 	{ "sshd_port", "22" },
+@@ -2459,11 +2459,11 @@
+ #endif				/* micro build - use telnet remote mgmt */
+ 	{ "remote_mgt_telnet", "0" },
+ 	{ "telnet_wanport", "23" },	/* WAN port to listen on */
+-	{ "syslogd_enable", "0" },
++	{ "syslogd_enable", "1" },
+ #ifdef HAVE_JFFS2
+ 	{ "syslogd_jffs2", "0" },
+ #endif
+-	{ "klogd_enable", "0" },
++	{ "klogd_enable", "1" },
+ 	{ "syslogd_rem_ip", "" },
+ 	{ "sshd_replace", "0" },
+ 
+@@ -2828,7 +2828,7 @@
+ #elif defined(DEFAULT_LANGUAGE)
+ 	{ "language", DEFAULT_LANGUAGE },
+ #else
+-	{ "language", "english" },
++	{ "language", "chinese_simplified" },
+ #endif
+ 	{ "macupd_ip", "0.0.0.0" },
+ 	{ "macupd_port", "2056" },
+Index: src/router/services/sysinit/sysinit.c
+===================================================================
+--- src/router/services/sysinit/sysinit.c	(revision 53464)
++++ src/router/services/sysinit/sysinit.c	(working copy)
+@@ -2477,7 +2477,7 @@
+ #endif
+ 		nvram_set("lan_proto", "static");
+ #else
+-		nvram_set("lan_ipaddr", "192.168.1.1");
++		nvram_set("lan_ipaddr", "192.168.2.1");
+ #endif
+ 	}
+ #ifdef HAVE_SKYTRON

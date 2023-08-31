@@ -1,0 +1,87 @@
+name: build
+
+on: 
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'publish build result to a release'
+        required: true
+        type: boolean
+  schedule:
+    - cron: '30 21 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        drv: [mt_wifi, mt76]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          append-timestamp: false
+      - name: Install packages
+        run: |
+          sudo apt update
+          sudo apt install unzip libtool-bin ccache curl cmake gperf gawk flex bison nano xxd \
+            fakeroot kmod cpio bc zip git python3-docutils gettext gengetopt gtk-doc-tools \
+            automake autopoint meson texinfo build-essential help2man pkg-config zlib1g-dev \
+            libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin
+          sudo apt install uglifyjs npm && sudo npm install uglifycss
+      - uses: robinraju/release-downloader@v1.8
+        with:
+          tag: toolchain
+          fileName: toolchain-mipsel_24kc_gcc-13.1.0_musl.tar.gz
+      - name: Extract toolchain
+        run: tar zxf toolchain-mipsel_24kc_gcc-13.1.0_musl.tar.gz
+      - name: Checkout
+        run: make checkout
+      - name: Prepare
+        run: make prepare DRV=${{ matrix.drv }}
+      - name: Configure
+        run: make configure
+      - name: Build kernel
+        run: make kernel
+      - name: Build all
+        run: make all
+      - name: Build image
+        run: make image
+      - name: Rename image
+        run: |
+          if [ "$DRV" = "mt_wifi" ]; then
+            for f in images/*.bin; do
+              mv $f ${f/.bin/-drv.bin}
+            done
+          fi
+        env:
+          DRV: "${{ matrix.drv }}"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: images
+          path: images/*.bin
+  publish:
+    needs: [build]
+    runs-on: ubuntu-22.04
+    if: ${{ github.event_name == 'schedule' || inputs.publish }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+      - name: Set Tag Name
+        run: echo "TAG_ANME=$(date +%Y%m%d)" >> $GITHUB_ENV
+      - uses: rickstaa/action-create-tag@v1
+        with:
+          tag: ${{ env.TAG_ANME }}
+          force_push_tag: true
+      - uses: ncipollo/release-action@v1
+        with:
+          commit: ${{ github.sha }}
+          tag: ${{ env.TAG_ANME }}
+          artifacts: "images/*.bin"
+          allowUpdates: true
+      - uses: dev-drprasad/delete-older-releases@v0.2.1
+        with:
+          keep_latest: 7
+          delete_tags: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

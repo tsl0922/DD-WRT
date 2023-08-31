@@ -1,0 +1,35 @@
+Index: src/router/glib20/libglib/gio/meson.build
+===================================================================
+--- src/router/glib20/libglib/gio/meson.build	(revision 53464)
++++ src/router/glib20/libglib/gio/meson.build	(working copy)
+@@ -39,7 +39,7 @@
+ 
+ network_libs = [ ]
+ network_args = [ ]
+-if host_system != 'windows'
++if false
+   # res_query()
+   res_query_test = '''#include <resolv.h>
+                       int main (int argc, char ** argv) {
+Index: src/router/glib20/libglib/meson.build
+===================================================================
+--- src/router/glib20/libglib/meson.build	(revision 53464)
++++ src/router/glib20/libglib/meson.build	(working copy)
+@@ -2034,7 +2034,7 @@
+   # any external library for it
+   libiconv = []
+ else
+-  libiconv = dependency('iconv')
++  libiconv = dependency('iconv', native: true)
+ endif
+ 
+ pcre2_req = '>=10.32'
+@@ -2155,7 +2155,7 @@
+   # the library and a valid xattr header.
+ 
+   # try glibc
+-  if cc.has_function('getxattr') and cc.has_header('sys/xattr.h')
++  if cc.has_header('sys/xattr.h')
+     glib_conf.set('HAVE_SYS_XATTR_H', 1)
+     glib_conf_prefix = glib_conf_prefix + '#define @0@ 1\n'.format('HAVE_SYS_XATTR_H')
+   #failure. try libattr
