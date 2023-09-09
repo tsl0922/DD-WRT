@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
-          append-timestamp: false
+          key: ccache-${{ matrix.drv }}
       - name: Install packages
         run: |
           sudo apt update
