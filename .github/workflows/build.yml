@@ -36,7 +36,7 @@ jobs:
       - name: Extract toolchain
         run: tar zxf toolchain-mipsel_24kc_gcc-13.1.0_musl.tar.gz
       - name: Checkout
-        run: make checkout
+        run: make checkout DRV=${{ matrix.drv }}
       - name: Prepare
         run: make prepare DRV=${{ matrix.drv }}
       - name: Configure
