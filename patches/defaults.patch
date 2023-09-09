@@ -1,6 +1,6 @@
 Index: src/router/services/sysinit/defaults.c
 ===================================================================
---- src/router/services/sysinit/defaults.c	(revision 53464)
+--- src/router/services/sysinit/defaults.c	(revision 53470)
 +++ src/router/services/sysinit/defaults.c	(working copy)
 @@ -138,7 +138,7 @@
  #elif HAVE_CARLSONWIRELESS
@@ -29,6 +29,29 @@ Index: src/router/services/sysinit/defaults.c
  #endif
  	// { "dhcp_end", "150", 0 }, /* Last assignable DHCP address */ /* Remove 
  	// 
+@@ -827,8 +827,8 @@
+ 	{ "wl0_nbw_cap", "1" },
+ 	{ "wl1_nbw_cap", "1" },
+ 	{ "wl2_nbw_cap", "1" },
+-	{ "wl0_nbw", "20" },	/* N-BW */
+-	{ "wl1_nbw", "20" },	/* N-BW */
++	{ "wl0_nbw", "40" },	/* N-BW */
++	{ "wl1_nbw", "80" },	/* N-BW */
+ 	{ "wl2_nbw", "20" },	/* N-BW */
+ 	{ "wl0_bw_cap", "255" },	/* N-BW */
+ 	{ "wl1_bw_cap", "255" },	/* N-BW */
+@@ -1524,9 +1524,9 @@
+ #else
+ 	{ "wl_net_mode", "mixed" },	/* Wireless mode
+ 					 * (mixed|g-only|b-only|disable) */
+-	{ "wl0_net_mode", "mixed" },	/* Wireless mode
++	{ "wl0_net_mode", "ng-only" },	/* Wireless mode
+ 					 * (mixed|g-only|b-only|disable) */
+-	{ "wl1_net_mode", "mixed" },
++	{ "wl1_net_mode", "acn-mixed" },
+ 	{ "wl2_net_mode", "mixed" },
+ #endif
+ 
 @@ -2332,7 +2332,7 @@
  #elif defined(HAVE_NDTRADE)
  	{ "telnetd_enable", "0" },
@@ -72,7 +95,7 @@ Index: src/router/services/sysinit/defaults.c
  	{ "macupd_port", "2056" },
 Index: src/router/services/sysinit/sysinit.c
 ===================================================================
---- src/router/services/sysinit/sysinit.c	(revision 53464)
+--- src/router/services/sysinit/sysinit.c	(revision 53470)
 +++ src/router/services/sysinit/sysinit.c	(working copy)
 @@ -2477,7 +2477,7 @@
  #endif
