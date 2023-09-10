@@ -1328,7 +1328,6 @@ void stop_wifi()
 	eval("ifconfig", "wdsx8", "down");
 	eval("ifconfig", "wdsx9", "down");
 	eval("ifconfig", "apclix0", "down");
-	rmmod("mt_wifi");
 }
 
 void configure_wifi()
