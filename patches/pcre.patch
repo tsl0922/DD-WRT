@@ -1,11 +1,11 @@
 Index: src/router/rules/pcre.mk
 ===================================================================
---- src/router/rules/pcre.mk	(revision 53464)
+--- src/router/rules/pcre.mk	(revision 53486)
 +++ src/router/rules/pcre.mk	(working copy)
-@@ -1,8 +1,8 @@
+@@ -1,8 +1,7 @@
  pcre-configure:
  	cd pcre && ./configure --host=$(ARCH)-linux-uclibc CFLAGS="$(COPTS)  $(MIPS16_OPT)" --prefix=/usr --disable-xmldoc --enable-utf8 --enable-unicode-properties --disable-pcretest-libreadline --libdir=$(TOP)/pcre/.libs
- 	touch $(TOP)/pcre/*   
+-	touch $(TOP)/pcre/*   
 +	sed -i 's/link_all_deplibs=no/link_all_deplibs=yes/g' $(TOP)/pcre/libtool
  
 -
