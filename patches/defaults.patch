@@ -1,6 +1,6 @@
 Index: src/router/services/sysinit/defaults.c
 ===================================================================
---- src/router/services/sysinit/defaults.c	(revision 53470)
+--- src/router/services/sysinit/defaults.c	(revision 53486)
 +++ src/router/services/sysinit/defaults.c	(working copy)
 @@ -138,7 +138,7 @@
  #elif HAVE_CARLSONWIRELESS
@@ -93,9 +93,18 @@ Index: src/router/services/sysinit/defaults.c
  #endif
  	{ "macupd_ip", "0.0.0.0" },
  	{ "macupd_port", "2056" },
+@@ -2885,7 +2885,7 @@
+ #elif HAVE_MICRO
+ 	{ "ip_conntrack_max", "1024" },
+ #else
+-	{ "ip_conntrack_max", "4096" },
++	{ "ip_conntrack_max", "32768" },
+ #endif
+ #ifdef HAVE_80211AC
+ #ifndef HAVE_BUFFALO
 Index: src/router/services/sysinit/sysinit.c
 ===================================================================
---- src/router/services/sysinit/sysinit.c	(revision 53470)
+--- src/router/services/sysinit/sysinit.c	(revision 53486)
 +++ src/router/services/sysinit/sysinit.c	(working copy)
 @@ -2477,7 +2477,7 @@
  #endif
