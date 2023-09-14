@@ -13,11 +13,15 @@ PATH = $(TOOLCHAIN_DIR)/bin:$(TOP_DIR)/tools:/usr/local/sbin:/usr/local/bin:/usr
 
 CRDA_URL = git://git.kernel.org/pub/scm/linux/kernel/git/sforshee/wireless-regdb.git
 PKGS = coova-chilli curl ebtables-2.0.9 filesharing hostapd-2018-07-08 inadynv2 \
-	kromo l7 libevent libffi libmicrohttpd libnl-tiny lzma-loader \
+	kromo l7 libevent libffi libucontext libmicrohttpd libnl-tiny lzma-loader \
 	$(if $(subst mt76,,$(DRV)),,mac80211 mac80211-rules) madwifi.dev \
 	misc rp-pppoe rules tools udhcpc usb_modeswitch util-linux 
 
 export PATH SVN
+
+define CopyConfig
+	cp configs/$(if $(subst mt76,,$(1)),$(if $(subst mini,,$(1)),.config_drv,.config_mini),.config) $(BUILD_DIR)/.config
+endef
 
 define PatchDir
 	@for p in $(1)/*.patch; do \
@@ -55,20 +59,20 @@ checkout:
 	done
 
 	cp Makefile.mt7621 $(BUILD_DIR)/Makefile.mt7621
-	cp configs/.config_k2p $(BUILD_DIR)/.config
+	cp configs/.config $(BUILD_DIR)/.config
 
 	$(MAKE_ROUTER) download
 
 prepare:
 	$(call PatchDir,$(TOP_DIR)/patches)
+	$(call CopyConfig,$(DRV))
 ifeq ($(DRV),mt76)
 	[ -d $(BUILD_DIR)/crda ] || git clone $(CRDA_URL) $(BUILD_DIR)/crda
 	echo "#!/bin/sh\n\necho crda called" > $(BUILD_DIR)/crda/crda.sh
 	chmod +x $(BUILD_DIR)/crda/crda.sh
 	ln -sf mac80211 $(BUILD_DIR)/compat-wireless
 	ln -sf $(TOP_DIR)/dts/K2P.dts $(LINUX_DIR)/dts/K2P.dts
-	cp configs/.config_kernel $(LINUX_DIR)/.config
-	cp configs/.config_k2p $(BUILD_DIR)/.config
+	cp configs/kernel/.config $(LINUX_DIR)/.config
 else
 	$(call PatchDir,$(TOP_DIR)/drivers/patches)
 	rm -rf $(LINUX_DIR)/drivers/net/wireless/wifi_utility $(LINUX_DIR)/drivers/net/wireless/rt7615
@@ -79,8 +83,7 @@ else
 	ln -sf $(TOP_DIR)/drivers/wireless_ralink.c $(BUILD_DIR)/httpd/visuals/wireless_ralink.c
 	ln -sf $(TOP_DIR)/drivers/rt2880.c $(BUILD_DIR)/services/networking/wifi/rt2880.c
 	ln -sf $(TOP_DIR)/dts/K2P_drv.dts $(LINUX_DIR)/dts/K2P.dts
-	cp configs/.config_kernel_drv $(LINUX_DIR)/.config
-	cp configs/.config_k2p_drv $(BUILD_DIR)/.config
+	cp configs/kernel/.config_drv $(LINUX_DIR)/.config
 endif
 	ln -sf ../../opt $(BUILD_DIR)/opt
 	cp $(LINUX_DIR)/drivers/net/wireless/Kconfig.dir882 $(LINUX_DIR)/drivers/net/wireless/Kconfig
@@ -96,6 +99,7 @@ configure:
 	$(MAKE_ROUTER) libffi-configure libffi
 	$(MAKE_ROUTER) libnl-configure libnl
 	$(MAKE_ROUTER) libpcap-configure libpcap
+	$(MAKE_ROUTER) libucontext-configure libucontext
 	$(MAKE_ROUTER) openssl-configure openssl
 	$(MAKE_ROUTER) curl-configure curl
 	$(MAKE_ROUTER) gmp-configure gmp

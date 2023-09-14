@@ -15,12 +15,12 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        drv: [mt_wifi, mt76]
+        drv: [mt76, drv, mini]
     steps:
       - uses: actions/checkout@v3
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ccache-${{ matrix.drv }}
+          key: ${{ matrix.drv }}
       - name: Install packages
         run: |
           sudo apt update
@@ -49,11 +49,9 @@ jobs:
         run: make image
       - name: Rename image
         run: |
-          if [ "$DRV" = "mt_wifi" ]; then
-            for f in images/*.bin; do
-              mv $f ${f/.bin/-drv.bin}
-            done
-          fi
+          for f in images/*.bin; do
+            mv $f ${f/.bin/-$DRV.bin}
+          done
         env:
           DRV: "${{ matrix.drv }}"
       - uses: actions/upload-artifact@v3

@@ -1,8 +1,16 @@
 Index: src/router/others/Makefile
 ===================================================================
---- src/router/others/Makefile	(revision 53464)
+--- src/router/others/Makefile	(revision 53486)
 +++ src/router/others/Makefile	(working copy)
-@@ -61,28 +61,10 @@
+@@ -54,7 +54,6 @@
+ 	install -d $(INSTALLDIR)/sbin
+ 	install -d $(INSTALLDIR)/usr/sbin
+ 	install -d $(INSTALLDIR)/usr/lib
+-	install -d $(INSTALLDIR)/usr/lib/firmware	
+ 	install -d $(INSTALLDIR)/lib
+ 	install services $(INSTALLDIR)/etc
+ ifdef CONFIG_NORTHSTAR
+@@ -61,28 +60,10 @@
  	install -d $(INSTALLDIR)/etc/cfe
  	install cfe/cfe_600.bin $(INSTALLDIR)/etc/cfe
  endif
