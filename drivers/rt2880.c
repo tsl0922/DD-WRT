@@ -649,19 +649,26 @@ void gen_wifi_config(int idx)
 	if (nvram_nmatch("infra", "wl%d_mode", idx)) {
 		strcat(authmode, "WPANONE");
 	} else {
-
 		if (nvram_nmatch("wpa", "wl%d_akm", idx))
 			strcat(authmode, "WPA");
 		if (nvram_nmatch("wpa2", "wl%d_akm", idx))
 			strcat(authmode, "WPA2");
 		if (nvram_nmatch("wpa wpa2", "wl%d_akm", idx))
 			strcat(authmode, "WPA1WPA2");
+		if (nvram_nmatch("wpa3", "wl%d_akm", idx) || nvram_nmatch("wpa2 wpa3", "wl%d_akm", idx))
+			strcat(authmode, "WPA3");
+		if (nvram_nmatch("wpa3-192", "wl%d_akm", idx) || nvram_nmatch("wpa2 wpa3-192", "wl%d_akm", idx))
+			strcat(authmode, "WPA3-192");
 		if (nvram_nmatch("psk2", "wl%d_akm", idx))
 			strcat(authmode, "WPA2PSK");
 		if (nvram_nmatch("psk", "wl%d_akm", idx))
 			strcat(authmode, "WPAPSK");
 		if (nvram_nmatch("psk psk2", "wl%d_akm", idx))
 			strcat(authmode, "WPAPSKWPA2PSK");
+		if (nvram_nmatch("psk3", "wl%d_akm", idx))
+			strcat(authmode, "WPA3PSK");
+		if (nvram_nmatch("psk2 psk3", "wl%d_akm", idx))
+			strcat(authmode, "WPA2PSKWPA3PSK");
 	}
 	if (nvram_nmatch("radius", "wl%d_akm", idx)) {
 		startradius[idx] = 1;
@@ -746,12 +753,20 @@ void gen_wifi_config(int idx)
 			strcat(authmode, ";WPAPSK");
 		if (nvram_nmatch("psk2", "%s_akm", var))
 			strcat(authmode, ";WPA2PSK");
+		if (nvram_nmatch("psk3", "%s_akm", var))
+			strcat(authmode, ";WPA3PSK");
 		if (nvram_nmatch("psk psk2", "%s_akm", var))
 			strcat(authmode, ";WPAPSKWPA2PSK");
+		if (nvram_nmatch("psk2 psk3", "%s_akm", var))
+			strcat(authmode, ";WPA2PSKWPA3PSK");
 		if (nvram_nmatch("wpa", "%s_akm", var))
 			strcat(authmode, ";WPA");
 		if (nvram_nmatch("wpa2", "%s_akm", var))
 			strcat(authmode, ";WPA2");
+		if (nvram_nmatch("wpa3", "%s_akm", var) || nvram_nmatch("wpa2 wpa3", "%s_akm", var))
+			strcat(authmode, ";WPA3");
+		if (nvram_nmatch("wpa3-192", "%s_akm", var) || nvram_nmatch("wpa2 wpa3-192", "%s_akm", var))
+			strcat(authmode, ";WPA3-192");
 		if (nvram_nmatch("wpa wpa2", "%s_akm", var))
 			strcat(authmode, ";WPA1WPA2");
 		if (nvram_nmatch("radius", "%s_akm", var)) {
