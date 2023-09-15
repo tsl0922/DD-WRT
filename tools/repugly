@@ -1,10 +1,12 @@
 #!/bin/sh
 
+set -e
+
 target=$1
 
 [ -d "$target" ] || exit 0
 
 for js in $(find $target -path "*.js"); do
-    echo "== compressing $js.."
+    echo "== [uglifyjs] $js"
     uglifyjs $js -o $js
 done

@@ -1,0 +1,16 @@
+Index: src/router/rules/configs.mk
+===================================================================
+--- src/router/rules/configs.mk	(revision 53486)
++++ src/router/rules/configs.mk	(working copy)
+@@ -258,9 +258,11 @@
+ obj-$(CONFIG_RT2860) += rt2860
+ obj-$(CONFIG_P910ND) += p910nd
+ obj-$(CONFIG_DRIVER_WIRED) += libnfnetlink libnetfilter_log
++ifeq ($(CONFIG_HOSTAPD2),y)
+ ifneq ($(CONFIG_OPENSSL),y)
+ obj-$(CONFIG_WPA3) += wolfssl
+ endif
++endif
+ obj-$(CONFIG_WOLFSSL) += wolfssl
+ obj-$(CONFIG_HOSTAPD2) += hostapd2
+ obj-$(CONFIG_WPA_SUPPLICANT2) += wpa_supplicant2

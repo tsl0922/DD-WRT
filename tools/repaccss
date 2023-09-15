@@ -1,10 +1,12 @@
 #!/bin/sh
 
+set -e
+
 target=$1
 
 [ -d "$target" ] || exit 0
 
 for css in $(find $target -path "*.css"); do
-    echo "== compressing $css.."
-    uglifycss --ugly-comments $css > $css.compressed && mv $css.compressed $css
+    echo "== [uglifycss] $css"
+    uglifycss --ugly-comments --output $css $css
 done

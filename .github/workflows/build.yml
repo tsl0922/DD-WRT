@@ -28,7 +28,12 @@ jobs:
             fakeroot kmod cpio bc zip git python3-docutils gettext gengetopt gtk-doc-tools \
             automake autopoint meson texinfo build-essential help2man pkg-config zlib1g-dev \
             libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin
-          sudo apt install uglifyjs npm && sudo npm install uglifycss
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          check-latest: true
+      - name: Install npm packages
+        run: sudo npm install -g uglify-js uglifycss
       - uses: robinraju/release-downloader@v1.8
         with:
           tag: toolchain
@@ -81,5 +86,6 @@ jobs:
         with:
           keep_latest: 7
           delete_tags: true
+          delete_tag_pattern: "20"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -246,6 +246,7 @@ install package: clean_target $(filter-out lib.$(ARCH)-install,$(obj-install))
 	for dir in $(wildcard $(patsubst %,$(INSTALLDIR)/%,$(obj-y))) ; do \
 	    (cd $${dir} && tar cpf - .) | (cd $(TARGETDIR) && tar xpf -) \
 	done
+	ln -sf ../../lib/libc.so $(PLATFORMDIR)/target/usr/bin/ldd
 	mkdir -p $(PLATFORMDIR)/target/etc/config
 	mkdir -p $(PLATFORMDIR)/target/etc/kaid
 	mkdir -p $(PLATFORMDIR)/target/etc/langpack

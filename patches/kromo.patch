@@ -2,6 +2,17 @@ Index: src/router/kromo/dd-wrt/Makefile
 ===================================================================
 --- src/router/kromo/dd-wrt/Makefile	(revision 53486)
 +++ src/router/kromo/dd-wrt/Makefile	(working copy)
+@@ -78,8 +78,8 @@
+ 
+ 
+ 	mkdir -p $(INSTALLDIR)/www/lang_pack
+-	cp lang_pack/*.js $(INSTALLDIR)/www/lang_pack	
+-	rm -f $(INSTALLDIR)/www/lang_pack/arabic.js	
++	cp lang_pack/english.js $(INSTALLDIR)/www/lang_pack
++	cp lang_pack/chinese_simplified.js $(INSTALLDIR)/www/lang_pack
+ 	
+ ifneq ($(CONFIG_LANGUAGE),y)
+ 	rm -f $(INSTALLDIR)/www/lang_pack/*.js
 @@ -1005,6 +1005,9 @@
  	rm -f $(INSTALLDIR)/www/PPTP.asp
  	rm -f $(INSTALLDIR)/www/help/HPPTP.asp
