@@ -362,4 +362,4 @@ include rules/all.mk
 
 .PHONY: all clean distclean mrproper install package
 .PHONY: conf mconf oldconf kconf kmconf config menuconfig oldconfig
-.PHONY: dummy fixkc libnet libpcap libffi pcre
+.PHONY: dummy fixkc libnet libpcap libffi pcre zlib

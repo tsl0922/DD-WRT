@@ -2,6 +2,15 @@ Index: src/router/rules/configs.mk
 ===================================================================
 --- src/router/rules/configs.mk	(revision 53486)
 +++ src/router/rules/configs.mk	(working copy)
+@@ -210,7 +210,7 @@
+ obj-$(CONFIG_WDSWATCHDOG) += wdswatchdog
+ obj-$(CONFIG_IPV6) += ipv6 dhcpv6
+ obj-$(CONFIG_CONNTRACK) += conntrack
+-obj-y += radiooff
++obj-$(CONFIG_RADIOOFF) += radiooff
+ obj-$(CONFIG_PHP) += libffi zlib libzip libgd libpng libxml2 libmcrypt curl glib20 sqlite php8 zlib
+ obj-$(CONFIG_NCURSES) += ncurses
+ obj-$(CONFIG_IFTOP) += libpcap iftop
 @@ -258,9 +258,11 @@
  obj-$(CONFIG_RT2860) += rt2860
  obj-$(CONFIG_P910ND) += p910nd
