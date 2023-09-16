@@ -1,6 +1,6 @@
 Index: src/router/libutils/libutils/detect.c
 ===================================================================
---- src/router/libutils/libutils/detect.c	(revision 53464)
+--- src/router/libutils/libutils/detect.c	(revision 53493)
 +++ src/router/libutils/libutils/detect.c	(working copy)
 @@ -1101,7 +1101,7 @@
  			return ROUTER_DIR882;
@@ -13,7 +13,7 @@ Index: src/router/libutils/libutils/detect.c
  	}
 Index: src/router/libutils/libutils/gpio.c
 ===================================================================
---- src/router/libutils/libutils/gpio.c	(revision 53464)
+--- src/router/libutils/libutils/gpio.c	(revision 53493)
 +++ src/router/libutils/libutils/gpio.c	(working copy)
 @@ -1116,6 +1116,25 @@
  
@@ -53,7 +53,7 @@ Index: src/router/libutils/libutils/gpio.c
  		get_linux_gpio(pin);
 Index: src/router/libutils/libutils/ledconfig.c
 ===================================================================
---- src/router/libutils/libutils/ledconfig.c	(revision 53464)
+--- src/router/libutils/libutils/ledconfig.c	(revision 53493)
 +++ src/router/libutils/libutils/ledconfig.c	(working copy)
 @@ -598,12 +598,9 @@
  		cfg->usb_power = 0xa;
@@ -71,3 +71,35 @@ Index: src/router/libutils/libutils/ledconfig.c
  		break;
  	case ROUTER_DIR860LB1:
  		cfg->power_gpio = GPIO_LOW | 0xf;
+Index: src/router/rc/resetbutton.c
+===================================================================
+--- src/router/rc/resetbutton.c	(revision 53493)
++++ src/router/rc/resetbutton.c	(working copy)
+@@ -809,7 +809,7 @@
+ static void handle_reset(void)
+ {
+ 
+-	if ((brand & 0x000f) != 0x000f) {
++	if ((brand & 0x000ff) != 0x000ff) {
+ 		dd_loginfo("resetbutton", "factory default.\n");
+ #if !defined(HAVE_XSCALE) && !defined(HAVE_MAGICBOX) && !defined(HAVE_FONERA) && !defined(HAVE_WHRAG108) && !defined(HAVE_GATEWORX) && !defined(HAVE_LS2) && !defined(HAVE_CA8) && !defined(HAVE_TW6600) && !defined(HAVE_LS5) && !defined(HAVE_LSX) && !defined(HAVE_SOLO51)
+ 		led_control(LED_DIAG, LED_ON);
+@@ -1124,7 +1124,7 @@
+ 		val = (get_gpio(7) << 7) | (get_gpio(18) << 18);
+ 		break;
+ 	case ROUTER_DIR882:
+-		val = (get_gpio(7) << 7) | (get_gpio(15) << 15);
++		val = get_gpio(3) << 15;
+ 		break;
+ 	case ROUTER_R6800:
+ 		val = (get_gpio(18) << 18) | (get_gpio(12) << 12) | (get_gpio(14) << 14);
+@@ -1477,9 +1477,6 @@
+ 	case ROUTER_TPLINK_ARCHERC3150:
+ 		sesgpio = 0x103;
+ 		break;
+-	case ROUTER_DIR882:
+-		sesgpio = 0x107;
+-		break;
+ 	case ROUTER_R6800:
+ 		sesgpio = 0x112;
+ 		wifi24gpio = 0x10e;

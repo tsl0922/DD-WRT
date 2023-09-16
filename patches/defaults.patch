@@ -1,6 +1,6 @@
 Index: src/router/services/sysinit/defaults.c
 ===================================================================
---- src/router/services/sysinit/defaults.c	(revision 53486)
+--- src/router/services/sysinit/defaults.c	(revision 53493)
 +++ src/router/services/sysinit/defaults.c	(working copy)
 @@ -138,7 +138,7 @@
  #elif HAVE_CARLSONWIRELESS
@@ -52,6 +52,15 @@ Index: src/router/services/sysinit/defaults.c
  	{ "wl2_net_mode", "mixed" },
  #endif
  
+@@ -2315,7 +2315,7 @@
+ #else
+ 	{ "pptp_encrypt", "0" },
+ #endif
+-	{ "resetbutton_enable", "1" },
++	{ "resetbutton_enable", "0" },
+ 
+ #ifdef HAVE_SKYTRON
+ 	{ "telnetd_enable", "0" },
 @@ -2332,7 +2332,7 @@
  #elif defined(HAVE_NDTRADE)
  	{ "telnetd_enable", "0" },
@@ -104,7 +113,7 @@ Index: src/router/services/sysinit/defaults.c
  #ifndef HAVE_BUFFALO
 Index: src/router/services/sysinit/sysinit.c
 ===================================================================
---- src/router/services/sysinit/sysinit.c	(revision 53486)
+--- src/router/services/sysinit/sysinit.c	(revision 53493)
 +++ src/router/services/sysinit/sysinit.c	(working copy)
 @@ -2477,7 +2477,7 @@
  #endif
