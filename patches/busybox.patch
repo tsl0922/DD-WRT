@@ -1,0 +1,12 @@
+Index: src/router/rules/busybox.mk
+===================================================================
+--- src/router/rules/busybox.mk	(revision 53493)
++++ src/router/rules/busybox.mk	(working copy)
+@@ -688,6 +688,7 @@
+ 	echo "# CONFIG_SEEDRNG is not set" >> busybox/.config
+ 	echo "# CONFIG_TREE is not set" >> busybox/.config
+ 	echo "CONFIG_ASH_SLEEP=y" >> busybox/.config
++	sed -i 's|$$(PREFIX)|$(INSTALLDIR)/busybox|g' busybox/.config
+ 	cd busybox && make oldconfig
+ 	
+ #	-$(MAKE) -j 4 -C busybox STRIPTOOL=$(STRIP) PREFIX=$(INSTALLDIR)/busybox

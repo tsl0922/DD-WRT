@@ -24,13 +24,15 @@ define CopyConfig
 endef
 
 define PatchDir
-	@for p in $(1)/*.patch; do \
-		echo "== Applying $$p..."; \
-		for f in $$(grep '^Index: ' $$p | awk '{print $$2}'); do \
-			svn revert $(SRC_DIR)/$$f; \
-		done; \
-		patch -d $(SRC_DIR) -p0 < $$p; \
-	done
+	@if [ -d $(1) ] && [ "$$(ls $(1) | wc -l)" -gt 0 ]; then \
+		for p in $(1)/*.patch; do \
+			echo "== Applying $$p..."; \
+			for f in $$(grep '^Index: ' $$p | awk '{print $$2}'); do \
+				svn revert $(SRC_DIR)/$$f; \
+			done; \
+			patch -t -d $(SRC_DIR) -p0 < $$p || true; \
+		done \
+	fi
 endef
 
 all:
@@ -65,6 +67,7 @@ checkout:
 
 prepare:
 	$(call PatchDir,$(TOP_DIR)/patches)
+	$(call PatchDir,$(TOP_DIR)/patches/$(DRV))
 	$(call CopyConfig,$(DRV))
 ifeq ($(DRV),mt76)
 	[ -d $(BUILD_DIR)/crda ] || git clone $(CRDA_URL) $(BUILD_DIR)/crda
@@ -92,8 +95,7 @@ endif
 	$(MAKE_ROUTER) gen_revision
 
 configure:
-	(cd $(BUILD_DIR)/libevent; autoreconf -fi)
-	(cd $(BUILD_DIR)/pcre; autoreconf -fi)
+ifneq ($(DRV),mini)
 	$(MAKE_ROUTER) ncurses-configure ncurses
 	$(MAKE_ROUTER) zlib-configure zlib
 	$(MAKE_ROUTER) libffi-configure libffi
@@ -103,9 +105,10 @@ configure:
 	$(MAKE_ROUTER) openssl-configure openssl
 	$(MAKE_ROUTER) curl-configure curl
 	$(MAKE_ROUTER) gmp-configure gmp
+	$(MAKE_ROUTER) wolfssl-configure wolfssl
+endif
 	$(MAKE_ROUTER) pcre-configure pcre
 	$(MAKE_ROUTER) nettle-configure nettle
-	$(MAKE_ROUTER) wolfssl-configure wolfssl
 	$(MAKE_ROUTER) configure
 
 image:
