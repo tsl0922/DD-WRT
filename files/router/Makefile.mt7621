@@ -349,6 +349,7 @@ image:
 	lzma e -lc1 -lp2 -pb2 -d25 $(PLATFORMDIR)/vmlinux.bin $(PLATFORMDIR)/vmlinux.lzma
 	make -C lzma-loader/mt7621 clean
 	make -C lzma-loader/mt7621 LOADER_DATA=$(PLATFORMDIR)/vmlinux.lzma
+	rm -f $(PLATFORMDIR)/dd-wrt-v3.0-*.bin
 	@cd $(PLATFORMDIR); \
 		ENTRY=`readelf -h $(TOP)/lzma-loader/mt7621/loader.elf | grep "Entry" | awk '{print $$4}'`; \
 		mkimage -A mips -O linux -C none -T kernel \
