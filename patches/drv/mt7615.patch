@@ -1,6 +1,6 @@
 Index: src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882
 ===================================================================
---- src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882	(revision 53464)
+--- src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882	(revision 53493)
 +++ src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882	(working copy)
 @@ -33,6 +33,146 @@
  source "drivers/net/wireless/ti/Kconfig"
@@ -140,7 +140,7 @@ Index: src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882
 +
 +if (FIRST_IF_MT7615E || SECOND_IF_MT7615E)
 +menu "MediaTek MT7615E PCIe Wireless driver"
-+source "drivers/net/wireless/rt7615/mt_wifi/embedded/Kconfig"
++source "drivers/net/wireless/mt7615/mt_wifi/embedded/Kconfig"
 +endmenu
 +endif
 +
@@ -151,7 +151,7 @@ Index: src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882
  	depends on PCMCIA
 Index: src/linux/universal/linux-4.14/drivers/net/wireless/Makefile
 ===================================================================
---- src/linux/universal/linux-4.14/drivers/net/wireless/Makefile	(revision 53464)
+--- src/linux/universal/linux-4.14/drivers/net/wireless/Makefile	(revision 53493)
 +++ src/linux/universal/linux-4.14/drivers/net/wireless/Makefile	(working copy)
 @@ -14,21 +14,11 @@
  obj-$(CONFIG_WLAN_VENDOR_MEDIATEK) += mediatek/
@@ -170,11 +170,12 @@ Index: src/linux/universal/linux-4.14/drivers/net/wireless/Makefile
 -endif
 -ifeq ($(CONFIG_SOC_MT7621),y)
 -obj-$(CONFIG_RLT_AP_SUPPORT)      += rt7612/rlt_wifi_ap/
+-obj-$(CONFIG_MT_AP_SUPPORT)      += rt7615/mt_wifi_ap/
+-endif
 +
 +# Add wifi-utility And always build-in
 +obj-y += wifi_utility/
- obj-$(CONFIG_MT_AP_SUPPORT)      += rt7615/mt_wifi_ap/
--endif
++obj-$(CONFIG_MT_AP_SUPPORT)      += mt7615/mt_wifi_ap/
 +
  obj-$(CONFIG_WLAN_VENDOR_RSI) += rsi/
  obj-$(CONFIG_WLAN_VENDOR_ST) += st/

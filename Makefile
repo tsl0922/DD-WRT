@@ -20,7 +20,7 @@ PKGS = coova-chilli curl ebtables-2.0.9 filesharing hostapd-2018-07-08 inadynv2 
 export PATH SVN
 
 define CopyConfig
-	cp configs/$(if $(subst mt76,,$(1)),$(if $(subst mini,,$(1)),.config_drv,.config_mini),.config) $(BUILD_DIR)/.config
+	cp $(TOP_DIR)/configs/$(if $(subst mt76,,$(1)),$(if $(subst mini,,$(1)),.config_drv,.config_mini),.config) $(BUILD_DIR)/.config
 endef
 
 define PatchDir
@@ -60,38 +60,32 @@ checkout:
 		$(SVN) up $(SRC_DIR)/src/router/$$dir --set-depth infinity --quiet; \
 	done
 
-	cp Makefile.mt7621 $(BUILD_DIR)/Makefile.mt7621
-	cp configs/.config $(BUILD_DIR)/.config
+	cp $(TOP_DIR)/files/router/Makefile.mt7621 $(BUILD_DIR)/Makefile.mt7621
+	cp $(TOP_DIR)/configs/.config $(BUILD_DIR)/.config
 
 	$(MAKE_ROUTER) download
 
 prepare:
 	$(call PatchDir,$(TOP_DIR)/patches)
-	$(call PatchDir,$(TOP_DIR)/patches/$(DRV))
 	$(call CopyConfig,$(DRV))
 ifeq ($(DRV),mt76)
+	$(call PatchDir,$(TOP_DIR)/patches/mt76)
 	[ -d $(BUILD_DIR)/crda ] || git clone $(CRDA_URL) $(BUILD_DIR)/crda
 	echo "#!/bin/sh\n\necho crda called" > $(BUILD_DIR)/crda/crda.sh
 	chmod +x $(BUILD_DIR)/crda/crda.sh
 	ln -sf mac80211 $(BUILD_DIR)/compat-wireless
-	ln -sf $(TOP_DIR)/dts/K2P.dts $(LINUX_DIR)/dts/K2P.dts
-	cp configs/kernel/.config $(LINUX_DIR)/.config
+	cp $(TOP_DIR)/files/linux/dts/K2P.dts $(LINUX_DIR)/dts/K2P.dts
+	cp $(TOP_DIR)/configs/kernel/.config $(LINUX_DIR)/.config
 else
-	$(call PatchDir,$(TOP_DIR)/drivers/patches)
-	rm -rf $(LINUX_DIR)/drivers/net/wireless/wifi_utility $(LINUX_DIR)/drivers/net/wireless/rt7615
-	ln -sf $(TOP_DIR)/drivers/wifi_utility  $(LINUX_DIR)/drivers/net/wireless/wifi_utility
-	ln -sf $(TOP_DIR)/drivers/mt7615 $(LINUX_DIR)/drivers/net/wireless/rt7615
-	rm -rf $(BUILD_DIR)/others/rt2880/mt7615
-	ln -sf $(TOP_DIR)/drivers/files $(BUILD_DIR)/others/rt2880/mt7615
-	ln -sf $(TOP_DIR)/drivers/wireless_ralink.c $(BUILD_DIR)/httpd/visuals/wireless_ralink.c
-	ln -sf $(TOP_DIR)/drivers/rt2880.c $(BUILD_DIR)/services/networking/wifi/rt2880.c
-	ln -sf $(TOP_DIR)/dts/K2P_drv.dts $(LINUX_DIR)/dts/K2P.dts
-	cp configs/kernel/.config_drv $(LINUX_DIR)/.config
+	$(call PatchDir,$(TOP_DIR)/patches/drv)
+	cp -r $(TOP_DIR)/files/linux/drivers $(LINUX_DIR)/
+	cp -r $(TOP_DIR)/files/router/* $(BUILD_DIR)/
+	cp $(TOP_DIR)/files/linux/dts/K2P_drv.dts $(LINUX_DIR)/dts/K2P.dts
+	cp $(TOP_DIR)/configs/kernel/.config_drv $(LINUX_DIR)/.config
 endif
 	ln -sf ../../opt $(BUILD_DIR)/opt
 	cp $(LINUX_DIR)/drivers/net/wireless/Kconfig.dir882 $(LINUX_DIR)/drivers/net/wireless/Kconfig
 
-	cp Makefile.mt7621 $(BUILD_DIR)/Makefile.mt7621
 	$(MAKE_ROUTER) gen_revision
 
 configure:

@@ -1,8 +1,0 @@
-*.o
-*.o.*
-*.a
-*.s
-*.ko
-*.mod.c
-modules.builtin
-Module.symvers

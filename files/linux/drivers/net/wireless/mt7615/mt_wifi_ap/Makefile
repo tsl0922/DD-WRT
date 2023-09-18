@@ -1,4 +1,4 @@
-WIFI_DRV_PATH = drivers/net/wireless/rt7615/mt_wifi
+WIFI_DRV_PATH = drivers/net/wireless/mt7615/mt_wifi
 
 EXTRA_CFLAGS = -I$(WIFI_DRV_PATH)/include \
 				-I$(WIFI_DRV_PATH)/embedded/include \
