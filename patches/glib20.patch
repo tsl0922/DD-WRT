@@ -1,6 +1,6 @@
 Index: src/router/glib20/libglib/gio/meson.build
 ===================================================================
---- src/router/glib20/libglib/gio/meson.build	(revision 53464)
+--- src/router/glib20/libglib/gio/meson.build	(revision 53494)
 +++ src/router/glib20/libglib/gio/meson.build	(working copy)
 @@ -39,7 +39,7 @@
  
@@ -13,7 +13,7 @@ Index: src/router/glib20/libglib/gio/meson.build
                        int main (int argc, char ** argv) {
 Index: src/router/glib20/libglib/meson.build
 ===================================================================
---- src/router/glib20/libglib/meson.build	(revision 53464)
+--- src/router/glib20/libglib/meson.build	(revision 53494)
 +++ src/router/glib20/libglib/meson.build	(working copy)
 @@ -2034,7 +2034,7 @@
    # any external library for it

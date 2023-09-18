@@ -1,6 +1,6 @@
 Index: src/router/mactelnet/Makefile
 ===================================================================
---- src/router/mactelnet/Makefile	(revision 53457)
+--- src/router/mactelnet/Makefile	(revision 53494)
 +++ src/router/mactelnet/Makefile	(working copy)
 @@ -27,8 +27,8 @@
  	cd $(INSTALLDIR)/usr/bin && ln -sf mactelnet_multicall mndp

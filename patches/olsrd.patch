@@ -1,6 +1,6 @@
 Index: src/router/olsrd/src/cfgparser/local.mk
 ===================================================================
---- src/router/olsrd/src/cfgparser/local.mk	(revision 53464)
+--- src/router/olsrd/src/cfgparser/local.mk	(revision 53494)
 +++ src/router/olsrd/src/cfgparser/local.mk	(working copy)
 @@ -76,7 +76,7 @@
  endif

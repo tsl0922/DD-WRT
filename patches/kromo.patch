@@ -1,6 +1,6 @@
 Index: src/router/kromo/dd-wrt/Makefile
 ===================================================================
---- src/router/kromo/dd-wrt/Makefile	(revision 53486)
+--- src/router/kromo/dd-wrt/Makefile	(revision 53494)
 +++ src/router/kromo/dd-wrt/Makefile	(working copy)
 @@ -78,8 +78,8 @@
  

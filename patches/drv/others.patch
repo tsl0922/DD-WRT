@@ -1,6 +1,6 @@
 Index: src/router/others/Makefile
 ===================================================================
---- src/router/others/Makefile	(revision 53493)
+--- src/router/others/Makefile	(revision 53494)
 +++ src/router/others/Makefile	(working copy)
 @@ -54,7 +54,6 @@
  	install -d $(INSTALLDIR)/sbin

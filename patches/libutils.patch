@@ -1,6 +1,6 @@
 Index: src/router/libutils/Makefile
 ===================================================================
---- src/router/libutils/Makefile	(revision 53457)
+--- src/router/libutils/Makefile	(revision 53494)
 +++ src/router/libutils/Makefile	(working copy)
 @@ -157,9 +157,9 @@
  OBJS += $(TOP)/register/register_regulatory.o
@@ -17,7 +17,7 @@ Index: src/router/libutils/Makefile
  #OBJS += libutils/getifaddrs.o
 Index: src/router/libutils/libshutils/shutils.c
 ===================================================================
---- src/router/libutils/libshutils/shutils.c	(revision 53457)
+--- src/router/libutils/libshutils/shutils.c	(revision 53494)
 +++ src/router/libutils/libshutils/shutils.c	(working copy)
 @@ -1784,3 +1784,6 @@
  }

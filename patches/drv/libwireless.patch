@@ -1,6 +1,6 @@
 Index: src/router/libutils/libwireless/wl.c
 ===================================================================
---- src/router/libutils/libwireless/wl.c	(revision 53464)
+--- src/router/libutils/libwireless/wl.c	(revision 53494)
 +++ src/router/libutils/libwireless/wl.c	(working copy)
 @@ -144,7 +144,7 @@
  {

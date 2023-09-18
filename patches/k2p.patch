@@ -1,6 +1,6 @@
 Index: src/router/libutils/libutils/detect.c
 ===================================================================
---- src/router/libutils/libutils/detect.c	(revision 53493)
+--- src/router/libutils/libutils/detect.c	(revision 53494)
 +++ src/router/libutils/libutils/detect.c	(working copy)
 @@ -1101,7 +1101,7 @@
  			return ROUTER_DIR882;
@@ -13,7 +13,7 @@ Index: src/router/libutils/libutils/detect.c
  	}
 Index: src/router/libutils/libutils/gpio.c
 ===================================================================
---- src/router/libutils/libutils/gpio.c	(revision 53493)
+--- src/router/libutils/libutils/gpio.c	(revision 53494)
 +++ src/router/libutils/libutils/gpio.c	(working copy)
 @@ -1116,6 +1116,25 @@
  
@@ -53,7 +53,7 @@ Index: src/router/libutils/libutils/gpio.c
  		get_linux_gpio(pin);
 Index: src/router/libutils/libutils/ledconfig.c
 ===================================================================
---- src/router/libutils/libutils/ledconfig.c	(revision 53493)
+--- src/router/libutils/libutils/ledconfig.c	(revision 53494)
 +++ src/router/libutils/libutils/ledconfig.c	(working copy)
 @@ -598,12 +598,9 @@
  		cfg->usb_power = 0xa;
@@ -73,7 +73,7 @@ Index: src/router/libutils/libutils/ledconfig.c
  		cfg->power_gpio = GPIO_LOW | 0xf;
 Index: src/router/rc/resetbutton.c
 ===================================================================
---- src/router/rc/resetbutton.c	(revision 53493)
+--- src/router/rc/resetbutton.c	(revision 53494)
 +++ src/router/rc/resetbutton.c	(working copy)
 @@ -809,7 +809,7 @@
  static void handle_reset(void)

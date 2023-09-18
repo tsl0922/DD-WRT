@@ -1,6 +1,6 @@
 Index: src/router/services/sysinit/defaults.c
 ===================================================================
---- src/router/services/sysinit/defaults.c	(revision 53493)
+--- src/router/services/sysinit/defaults.c	(revision 53494)
 +++ src/router/services/sysinit/defaults.c	(working copy)
 @@ -138,7 +138,7 @@
  #elif HAVE_CARLSONWIRELESS
@@ -113,7 +113,7 @@ Index: src/router/services/sysinit/defaults.c
  #ifndef HAVE_BUFFALO
 Index: src/router/services/sysinit/sysinit.c
 ===================================================================
---- src/router/services/sysinit/sysinit.c	(revision 53493)
+--- src/router/services/sysinit/sysinit.c	(revision 53494)
 +++ src/router/services/sysinit/sysinit.c	(working copy)
 @@ -2477,7 +2477,7 @@
  #endif

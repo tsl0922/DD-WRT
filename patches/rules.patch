@@ -1,0 +1,165 @@
+Index: src/router/rules/busybox.mk
+===================================================================
+--- src/router/rules/busybox.mk	(revision 53494)
++++ src/router/rules/busybox.mk	(working copy)
+@@ -688,6 +688,7 @@
+ 	echo "# CONFIG_SEEDRNG is not set" >> busybox/.config
+ 	echo "# CONFIG_TREE is not set" >> busybox/.config
+ 	echo "CONFIG_ASH_SLEEP=y" >> busybox/.config
++	sed -i 's|$$(PREFIX)|$(INSTALLDIR)/busybox|g' busybox/.config
+ 	cd busybox && make oldconfig
+ 	
+ #	-$(MAKE) -j 4 -C busybox STRIPTOOL=$(STRIP) PREFIX=$(INSTALLDIR)/busybox
+Index: src/router/rules/configs.mk
+===================================================================
+--- src/router/rules/configs.mk	(revision 53494)
++++ src/router/rules/configs.mk	(working copy)
+@@ -210,7 +210,7 @@
+ obj-$(CONFIG_WDSWATCHDOG) += wdswatchdog
+ obj-$(CONFIG_IPV6) += ipv6 dhcpv6
+ obj-$(CONFIG_CONNTRACK) += conntrack
+-obj-y += radiooff
++obj-$(CONFIG_RADIOOFF) += radiooff
+ obj-$(CONFIG_PHP) += libffi zlib libzip libgd libpng libxml2 libmcrypt curl glib20 sqlite php8 zlib
+ obj-$(CONFIG_NCURSES) += ncurses
+ obj-$(CONFIG_IFTOP) += libpcap iftop
+@@ -258,9 +258,11 @@
+ obj-$(CONFIG_RT2860) += rt2860
+ obj-$(CONFIG_P910ND) += p910nd
+ obj-$(CONFIG_DRIVER_WIRED) += libnfnetlink libnetfilter_log
++ifeq ($(CONFIG_HOSTAPD2),y)
+ ifneq ($(CONFIG_OPENSSL),y)
+ obj-$(CONFIG_WPA3) += wolfssl
+ endif
++endif
+ obj-$(CONFIG_WOLFSSL) += wolfssl
+ obj-$(CONFIG_HOSTAPD2) += hostapd2
+ obj-$(CONFIG_WPA_SUPPLICANT2) += wpa_supplicant2
+Index: src/router/rules/hostapd-wps.mk
+===================================================================
+--- src/router/rules/hostapd-wps.mk	(revision 53494)
++++ src/router/rules/hostapd-wps.mk	(working copy)
+@@ -35,13 +35,9 @@
+ 	cp shared/nl80211.h hostapd-$(HOSTAPDVERSION)/src/drivers/nl80211_copy.h
+ 	$(MAKE) -C hostapd-$(HOSTAPDVERSION)/hostapd clean
+ 	$(MAKE) -C hostapd-$(HOSTAPDVERSION)/wpa_supplicant clean
+-	echo ` \
+-		$(MAKE) -s -C hostapd-$(HOSTAPDVERSION)/hostapd MULTICALL=1 dump_cflags; \
+-		$(MAKE) -s -C hostapd-$(HOSTAPDVERSION)/wpa_supplicant MULTICALL=1 dump_cflags \
+-	` > hostapd-$(HOSTAPDVERSION)/.cflags
++	$(MAKE) -s --no-print-directory -C hostapd-$(HOSTAPDVERSION)/hostapd MULTICALL=1 dump_cflags > hostapd-$(HOSTAPDVERSION)/.cflags
++	$(MAKE) -s --no-print-directory -C hostapd-$(HOSTAPDVERSION)/wpa_supplicant MULTICALL=1 dump_cflags >> hostapd-$(HOSTAPDVERSION)/.cflags
+ 
+-	
+-
+ 	$(MAKE) -C hostapd-$(HOSTAPDVERSION)/hostapd CFLAGS="$$(cat hostapd-$(HOSTAPDVERSION)/.cflags) $(LTO) $(ATH9K_CFLAGS)" CONFIG_ATH9K=$(CONFIG_ATH9K) MULTICALL=1 hostapd_cli hostapd_multi.a
+ 	$(MAKE) -C hostapd-$(HOSTAPDVERSION)/wpa_supplicant CFLAGS="$$(cat hostapd-$(HOSTAPDVERSION)/.cflags) $(LTO) $(ATH9K_CFLAGS)" CONFIG_ATH9K=$(CONFIG_ATH9K) MULTICALL=1 wpa_cli wpa_supplicant_multi.a
+ 	$(CC) $(COPTS) $(MIPS16_OPT) $(LDLTO) -L$(TOP)/nvram  -L$(TOP)/libutils -Wall -ffunction-sections -fdata-sections -Wl,--gc-sections -o hostapd-$(HOSTAPDVERSION)/wpad hostapd-$(HOSTAPDVERSION)/multicall/multicall.c \
+Index: src/router/rules/libevent.mk
+===================================================================
+--- src/router/rules/libevent.mk	(revision 53494)
++++ src/router/rules/libevent.mk	(working copy)
+@@ -19,6 +19,7 @@
+ 	$(MAKE) -C libevent clean
+ 
+ libevent-configure: openssl
++	cd libevent && autoreconf -fi
+ 	cd libevent && ./configure  --disable-debug-mode --prefix=/usr ac_cv_host=$(ARCH)-uclibc-linux --libdir=/usr/lib --target=$(ARCH)-linux --host=$(ARCH) CC="ccache $(ARCH)-linux-uclibc-gcc" \
+ 	CFLAGS="$(COPTS) $(MIPS16_OPT) -I$(TOP)/openssl/include -ffunction-sections -fdata-sections -Wl,--gc-sections" \
+ 	LDFLAGS="$(COPTS) $(MIPS16_OPT) -L$(TOP)/openssl" 
+Index: src/router/rules/nettle.mk
+===================================================================
+--- src/router/rules/nettle.mk	(revision 53494)
++++ src/router/rules/nettle.mk	(working copy)
+@@ -24,8 +24,9 @@
+ 	RANLIB="$(ARCH)-linux-ranlib $(LTOPLUGIN)"
+ 
+ nettle: openssl gmp pcre
++	make -C nettle clean
+ 	make -C nettle desdata CC_FOR_BUILD="gcc"
+-	make -C nettle CC_FOR_BUILD="gcc"
++	make -C nettle CC_FOR_BUILD="gcc" -j4
+ 
+ nettle-clean:
+ 	-make -C nettle clean
+Index: src/router/rules/openssl.mk
+===================================================================
+--- src/router/rules/openssl.mk	(revision 53494)
++++ src/router/rules/openssl.mk	(working copy)
+@@ -118,7 +118,7 @@
+ 
+ 
+ 
+-openssl-configure:
++openssl-configure: libucontext
+ 	cd openssl && CROSS_COMPILE= && ./Configure $(OPENSSL_TARGET) \
+ 			--prefix=/usr \
+ 			--libdir=/usr/lib \
+@@ -140,7 +140,7 @@
+ #endif
+ 
+ 	$(MAKE) -C openssl clean
+-	-$(MAKE) -C openssl CC="$(CC) -I$(TOP)/openssl/crypto -fPIC" MAKEDEPPROG=$(ARCH)-linux-uclibc-gcc $(OPENSSL_MAKEFLAGS)
+-	-$(MAKE) -C openssl build_libs CC="$(CC) -fPIC" MAKEDEPPROG=$(ARCH)-linux-uclibc-gcc $(OPENSSL_MAKEFLAGS)
+-	-$(MAKE) -C openssl build_programs CC="$(CC) -fPIC" MAKEDEPPROG=$(ARCH)-linux-uclibc-gcc $(OPENSSL_MAKEFLAGS)
++	-$(MAKE) -C openssl CC="$(CC) -I$(TOP)/openssl/crypto -fPIC" MAKEDEPPROG=$(ARCH)-linux-uclibc-gcc $(OPENSSL_MAKEFLAGS) -j4
++	-$(MAKE) -C openssl build_libs CC="$(CC) -fPIC" MAKEDEPPROG=$(ARCH)-linux-uclibc-gcc $(OPENSSL_MAKEFLAGS) -j4
++	-$(MAKE) -C openssl build_programs CC="$(CC) -fPIC" MAKEDEPPROG=$(ARCH)-linux-uclibc-gcc $(OPENSSL_MAKEFLAGS) -j4
+ 	-rm -f openssl/apps/openssl
+Index: src/router/rules/pcre.mk
+===================================================================
+--- src/router/rules/pcre.mk	(revision 53494)
++++ src/router/rules/pcre.mk	(working copy)
+@@ -1,8 +1,8 @@
+ pcre-configure:
++	cd pcre && autoreconf -fi
+ 	cd pcre && ./configure --host=$(ARCH)-linux-uclibc CFLAGS="$(COPTS)  $(MIPS16_OPT)" --prefix=/usr --disable-xmldoc --enable-utf8 --enable-unicode-properties --disable-pcretest-libreadline --libdir=$(TOP)/pcre/.libs
+-	touch $(TOP)/pcre/*   
++	sed -i 's/link_all_deplibs=no/link_all_deplibs=yes/g' $(TOP)/pcre/libtool
+ 
+-
+ pcre:
+ 	$(MAKE) -C pcre CFLAGS="$(COPTS) $(MIPS16_OPT)" CXXFLAGS="$(COPTS) $(MIPS16_OPT)" CPPFLAGS="$(COPTS) $(MIPS16_OPT)"
+ 
+Index: src/router/rules/smbd.mk
+===================================================================
+--- src/router/rules/smbd.mk	(revision 53494)
++++ src/router/rules/smbd.mk	(working copy)
+@@ -9,7 +9,7 @@
+ 	    RANLIB="$(ARCH)-linux-ranlib $(LTOPLUGIN)"
+ 
+ 	cd smbd/tools-glib && ./autogen.sh
+-	cd smbd/tools-glib && ./configure --prefix=/usr --host=$(ARCH)-linux --disable-shared --enable-static  --libdir=/usr/lib \
++	cd smbd/tools-glib && PKG_CONFIG_PATH=$(TOP)/_staging_static/usr/lib/pkgconfig ./configure --prefix=/usr --host=$(ARCH)-linux --disable-shared --enable-static  --libdir=/usr/lib \
+ 	    CFLAGS="$(COPTS) $(LTO) $(MIPS16_OPT) -D_GNU_SOURCE -DNEED_PRINTF -I$(TOP)/_staging_static/usr/include/glib-2.0 -I$(TOP)/_staging_static/usr/lib/glib-2.0/include -Drpl_malloc=malloc -ffunction-sections -fdata-sections -Wl,--gc-sections" \
+ 	    LDFLAGS="-L$(TOP)/_staging_static/usr/lib $(LDLTO) -ffunction-sections -fdata-sections -Wl,--gc-sections" \
+ 	    LIBNL_CFLAGS="-I$(TOP)/libnl/include" \
+Index: src/router/rules/util-linux.mk
+===================================================================
+--- src/router/rules/util-linux.mk	(revision 53494)
++++ src/router/rules/util-linux.mk	(working copy)
+@@ -8,6 +8,7 @@
+ 	cd util-linux && autoheader
+ 	cd util-linux && autoreconf -vfi
+ 	cd util-linux && ./configure --host=$(ARCH)-linux-uclibc --prefix=/usr --libdir=/usr/tmp CFLAGS="$(COPTS) $(MIPS16_OPT) -fPIC -DNEED_PRINTF -I$(TOP)/ncurses/include" PKG_CONFIG="/tmp" \
++	--disable-makeinstall-chown \
+ 	--disable-rpath \
+ 	--enable-new-mount	\
+ 	--disable-tls		\
+@@ -18,13 +19,14 @@
+ 	--without-ncursesw	\
+ 	--without-tinfo \
+ 	--without-ncurses
+-	make -C util-linux
++	sed -i 's/link_all_deplibs=no/link_all_deplibs=yes/g' util-linux/libtool
++	make -C util-linux -j4
+ 
+ util-linux-clean:
+ 	make -C util-linux clean
+ 
+ util-linux: ncurses
+-	make -C util-linux
++	make -C util-linux -j4
+ 
+ util-linux-install:
+ 	make -C util-linux install DESTDIR=$(INSTALLDIR)/util-linux

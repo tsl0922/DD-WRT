@@ -65,6 +65,37 @@ checkout:
 
 	$(MAKE_ROUTER) download
 
+gen_patches:
+	@(cd $(SRC_DIR); \
+		svn diff src/router/services/sysinit/defaults.c \
+				src/router/services/sysinit/sysinit.c > $(TOP_DIR)/patches/defaults.patch; \
+		svn diff src/router/glib20/libglib/gio/meson.build \
+				src/router/glib20/libglib/meson.build  > $(TOP_DIR)/patches/glib20.patch; \
+		svn diff src/router/httpd/visuals/menu.c > $(TOP_DIR)/patches/httpd.patch; \
+		svn diff src/router/libutils/libutils/detect.c \
+				src/router/libutils/libutils/gpio.c \
+				src/router/libutils/libutils/ledconfig.c \
+				src/router/rc/resetbutton.c > $(TOP_DIR)/patches/k2p.patch; \
+		svn diff src/router/kromo/dd-wrt/Makefile > $(TOP_DIR)/patches/kromo.patch; \
+		svn diff src/router/libpcap/gencode.c > $(TOP_DIR)/patches/libpcap.patch; \
+		svn diff src/router/libutils/Makefile \
+				src/router/libutils/libshutils/shutils.c > $(TOP_DIR)/patches/libutils.patch; \
+		svn diff src/router/mactelnet/Makefile > $(TOP_DIR)/patches/mactelnet.patch; \
+		svn diff src/router/ntfs3/Makefile > $(TOP_DIR)/patches/ntfs3.patch; \
+		svn diff src/router/olsrd/src/cfgparser/local.mk > $(TOP_DIR)/patches/olsrd.patch; \
+		svn diff src/router/rules > $(TOP_DIR)/patches/rules.patch; \
+		svn diff src/router/vpnc/libgpg-error/src/Makefile.am \
+				src/router/vpnc/libgpg-error/src/Makefile.in \
+				src/router/vpnc/libgpg-error/src/mkstrtable.awk > $(TOP_DIR)/patches/vpnc.patch; \
+		svn diff src/router/mac80211/drivers/net/wireless/Kconfig \
+				src/router/mac80211/drivers/net/wireless/mediatek/mt76/Kconfig > $(TOP_DIR)/patches/mt76/mac80211.patch; \
+		svn diff src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882 \
+				src/linux/universal/linux-4.14/drivers/net/wireless/Makefile > $(TOP_DIR)/patches/drv/mt7615.patch; \
+		svn diff src/router/others/Makefile > $(TOP_DIR)/patches/drv/others.patch; \
+		svn diff src/linux/universal/linux-4.14/net/wireless/wext-core.c > $(TOP_DIR)/patches/drv/wext-core.patch; \
+		svn diff src/router/libutils/libwireless/wl.c > $(TOP_DIR)/patches/drv/libwireless.patch; \
+	)
+
 prepare:
 	$(call PatchDir,$(TOP_DIR)/patches)
 	$(call CopyConfig,$(DRV))

@@ -1,6 +1,6 @@
 Index: src/router/ntfs3/Makefile
 ===================================================================
---- src/router/ntfs3/Makefile	(revision 53457)
+--- src/router/ntfs3/Makefile	(revision 53494)
 +++ src/router/ntfs3/Makefile	(working copy)
 @@ -16,7 +16,7 @@
  

@@ -1,6 +1,6 @@
 Index: src/router/httpd/visuals/menu.c
 ===================================================================
---- src/router/httpd/visuals/menu.c	(revision 53486)
+--- src/router/httpd/visuals/menu.c	(revision 53494)
 +++ src/router/httpd/visuals/menu.c	(working copy)
 @@ -421,7 +421,7 @@
  				if (!strcmp_pnt(m->menu[i][j], "PPPoE_Server.asp"))
