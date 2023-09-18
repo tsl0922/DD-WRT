@@ -1,0 +1,16 @@
+Index: src/router/shared/utils.h
+===================================================================
+--- src/router/shared/utils.h	(revision 53494)
++++ src/router/shared/utils.h	(working copy)
+@@ -1218,7 +1218,11 @@
+ 
+ static inline int has_qam256(char *prefix)
+ {
++#ifdef HAVE_RT2880
++	return 1;
++#else
+ 	return 0;
++#endif
+ }
+ 
+ static inline int has_wave2(char *prefix)

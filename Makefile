@@ -84,6 +84,7 @@ gen_patches:
 		svn diff src/router/ntfs3/Makefile > $(TOP_DIR)/patches/ntfs3.patch; \
 		svn diff src/router/olsrd/src/cfgparser/local.mk > $(TOP_DIR)/patches/olsrd.patch; \
 		svn diff src/router/rules > $(TOP_DIR)/patches/rules.patch; \
+		svn diff src/router/shared > $(TOP_DIR)/patches/shared.patch; \
 		svn diff src/router/vpnc/libgpg-error/src/Makefile.am \
 				src/router/vpnc/libgpg-error/src/Makefile.in \
 				src/router/vpnc/libgpg-error/src/mkstrtable.awk > $(TOP_DIR)/patches/vpnc.patch; \
