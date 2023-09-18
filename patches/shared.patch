@@ -1,0 +1,32 @@
+Index: src/router/shared/utils.h
+===================================================================
+--- src/router/shared/utils.h	(revision 53494)
++++ src/router/shared/utils.h	(working copy)
+@@ -1218,7 +1218,11 @@
+ 
+ static inline int has_qam256(char *prefix)
+ {
++#ifdef HAVE_RT2880
++	return 1;
++#else
+ 	return 0;
++#endif
+ }
+ 
+ static inline int has_wave2(char *prefix)
+Index: src/router/shared/wlutils.h
+===================================================================
+--- src/router/shared/wlutils.h	(revision 53494)
++++ src/router/shared/wlutils.h	(working copy)
+@@ -526,7 +526,11 @@
+ extern void free_mac80211_ac(struct mac80211_ac *ac);
+ #else
+ #define has_airtime_fairness(prefix) 0
++#if defined(HAVE_RT2880) && !defined(HAVE_MT76)
++#define has_shortgi(prefix) 1
++#else
+ #define has_shortgi(prefix) 0
++#endif
+ #define has_subeamforming(prefix) 0
+ #define has_mubeamforming(prefix) 0
+ #define has_vht80(interface) 0

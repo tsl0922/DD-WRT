@@ -20,3 +20,22 @@ Index: src/router/httpd/visuals/menu.c
  				if (!strcmp_pnt(m->menu[i][j], "Hotspot.asp"))
  					goto skip;
  #endif
+Index: src/router/httpd/visuals/dd-wrt.c
+===================================================================
+--- src/router/httpd/visuals/dd-wrt.c	(revision 53494)
++++ src/router/httpd/visuals/dd-wrt.c	(working copy)
+@@ -3827,6 +3827,14 @@
+ 		sprintf(wl_overlap, "%s_overlap", prefix);
+ 		showRadio(wp, "wl_basic.overlap", wl_overlap);
+ 	}
++#if defined(HAVE_RT2880) && !defined(HAVE_MT76)
++	if (has_shortgi(prefix)) {
++		char wl_shortgi[32];
++		sprintf(wl_shortgi, "%s_shortgi", prefix);
++		nvram_default_get(wl_shortgi, "1");
++		showRadio(wp, "wl_basic.shortgi", wl_shortgi);
++	}
++#endif
+ 	if (has_qam256(prefix) && has_2ghz(prefix)) {
+ 		char wl_turboqam[32];
+ 		sprintf(wl_turboqam, "%s_turbo_qam", prefix);
