@@ -7,7 +7,7 @@
 
 / {
 	compatible = "phicomm,k2p", "ralink,mt7621-soc";
-	model = "Phicomm K2P";
+	model = "Phicomm K2P(Khaled-Hatem@967734542531)";
 
 	memory@0 {
 		device_type = "memory";
