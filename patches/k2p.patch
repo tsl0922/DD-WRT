@@ -7,7 +7,7 @@ Index: src/router/libutils/libutils/detect.c
  		}
  		if (!memcmp(sign, "DIR_878", 7)) {
 -			setRouter("Dlink DIR-878 R1");
-+			setRouter("Phicomm K2P");
++			setRouter("Phicomm K2P(Khaled-Hatem@967734542531)");
  			return ROUTER_DIR882;
  		}
  	}
