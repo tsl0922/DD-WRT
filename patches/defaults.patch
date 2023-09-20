@@ -7,7 +7,7 @@ Index: src/router/services/sysinit/defaults.c
  	{ "time_zone", "Etc/Zulu" },
  #else
 -	{ "time_zone", "Europe/Berlin" },
-+	{ "time_zone", "Asia/Shanghai" },
++	{ "time_zone", "Asia/Aden" },
  #endif
  #ifdef HAVE_SKYTRON
  	{ "ntp_server", "ntp0.fau.de" },	/* NTP server *//* Modify */
@@ -97,8 +97,6 @@ Index: src/router/services/sysinit/defaults.c
  #elif defined(DEFAULT_LANGUAGE)
  	{ "language", DEFAULT_LANGUAGE },
  #else
--	{ "language", "english" },
-+	{ "language", "chinese_simplified" },
  #endif
  	{ "macupd_ip", "0.0.0.0" },
  	{ "macupd_port", "2056" },
