@@ -67,6 +67,7 @@ checkout:
 
 gen_patches:
 	@(cd $(SRC_DIR); \
+		svn diff src/router/services/sysinit/devinit.c > $(TOP_DIR)/patches/devinit.patch; \
 		svn diff src/router/services/sysinit/defaults.c \
 				src/router/services/sysinit/sysinit.c > $(TOP_DIR)/patches/defaults.patch; \
 		svn diff src/router/glib20/libglib/gio/meson.build \

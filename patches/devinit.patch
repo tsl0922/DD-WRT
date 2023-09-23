@@ -1,0 +1,15 @@
+Index: src/router/services/sysinit/devinit.c
+===================================================================
+--- src/router/services/sysinit/devinit.c	(revision 53494)
++++ src/router/services/sysinit/devinit.c	(working copy)
+@@ -141,6 +141,10 @@
+ 
+ 	mknod("/dev/console", S_IFCHR | 0644, makedev(5, 1));
+ 	mknod("/dev/null", S_IFCHR | 0644, makedev(1, 3));
++	eval("ln", "-s", "/proc/self/fd", "/dev/fd");
++	eval("ln", "-s", "/proc/self/fd/0", "/dev/stdin");
++	eval("ln", "-s", "/proc/self/fd/1", "/dev/stdout");
++	eval("ln", "-s", "/proc/self/fd/2", "/dev/stderr");
+ 	mkdir("/dev/pts", 0700);
+ #else
+ 	// fix for linux kernel 2.6
