@@ -1,0 +1,31 @@
+Index: src/linux/universal/linux-4.14/net/ipv4/Kconfig
+===================================================================
+--- src/linux/universal/linux-4.14/net/ipv4/Kconfig	(revision 53494)
++++ src/linux/universal/linux-4.14/net/ipv4/Kconfig	(working copy)
+@@ -449,6 +449,14 @@
+ 
+ 	  If unsure, say Y.
+ 
++config INET_LRO
++	tristate "Large Receive Offload (ipv4/tcp)"
++	default y
++	---help---
++	  Support for Large Receive Offload (ipv4/tcp).
++
++	  If unsure, say Y.
++
+ config INET_DIAG
+ 	tristate "INET: socket monitoring interface"
+ 	select SOCK_DIAG
+Index: src/linux/universal/linux-4.14/net/ipv4/Makefile
+===================================================================
+--- src/linux/universal/linux-4.14/net/ipv4/Makefile	(revision 53494)
++++ src/linux/universal/linux-4.14/net/ipv4/Makefile	(working copy)
+@@ -38,6 +38,7 @@
+ obj-$(CONFIG_INET_IPCOMP) += ipcomp.o
+ obj-$(CONFIG_INET_XFRM_TUNNEL) += xfrm4_tunnel.o
+ obj-$(CONFIG_INET_XFRM_MODE_BEET) += xfrm4_mode_beet.o
++obj-$(CONFIG_INET_LRO) += inet_lro.o
+ obj-$(CONFIG_INET_TUNNEL) += tunnel4.o
+ obj-$(CONFIG_INET_XFRM_MODE_TRANSPORT) += xfrm4_mode_transport.o
+ obj-$(CONFIG_INET_XFRM_MODE_TUNNEL) += xfrm4_mode_tunnel.o

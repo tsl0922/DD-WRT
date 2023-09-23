@@ -1,0 +1,142 @@
+Index: src/linux/universal/linux-4.14/dts/mt7621.dtsi
+===================================================================
+--- src/linux/universal/linux-4.14/dts/mt7621.dtsi	(revision 53527)
++++ src/linux/universal/linux-4.14/dts/mt7621.dtsi	(working copy)
+@@ -442,49 +442,24 @@
+ 			0x1e003800 0x800>;
+ 	};
+ 
+-	ethernet: ethernet@1e100000 {
++	ethsys: ethsys@1e000000 {
++		compatible = "mediatek,mt7621-ethsys", "syscon";
++		reg = <0x1e000000 0x8000>;
++	};
++
++	raeth: raeth@1e100000 {
+ 		compatible = "mediatek,mt7621-eth";
+-		reg = <0x1e100000 0x10000>;
++		reg = <0x1e100000 0xE000>;
+ 
+-		#address-cells = <1>;
+-		#size-cells = <1>;
+-
+-		resets = <&rstctrl 6 &rstctrl 23>;
+-		reset-names = "fe", "eth";
+-
+ 		interrupt-parent = <&gic>;
+-		interrupts = <GIC_SHARED 3 IRQ_TYPE_LEVEL_HIGH>;
++		interrupts = <GIC_SHARED 3 IRQ_TYPE_LEVEL_HIGH
++				GIC_SHARED 23 IRQ_TYPE_LEVEL_HIGH>;
+ 
+-		mediatek,switch = <&gsw>;
++		mediatek,ethsys = <&ethsys>;
+ 
+-		mdio-bus {
+-			#address-cells = <1>;
+-			#size-cells = <0>;
+-
+-			phy1f: ethernet-phy@1f {
+-				reg = <0x1f>;
+-				phy-mode = "rgmii";
+-			};
+-		};
+-
+-		hnat: hnat@0 {
+-			compatible = "mediatek,mt7623-hnat";
+-			reg = <0 0x10000>;
+-			mtketh-ppd = "eth0";
+-			mtketh-lan = "eth0";
+-			mtketh-wan = "eth0";
+-			resets = <&rstctrl 0>;
+-			reset-names = "mtketh";
+-		};
++		status = "disabled";
+ 	};
+ 
+-	gsw: gsw@1e110000 {
+-		compatible = "mediatek,mt7621-gsw";
+-		reg = <0x1e110000 0x8000>;
+-		interrupt-parent = <&gic>;
+-		interrupts = <GIC_SHARED 23 IRQ_TYPE_LEVEL_HIGH>;
+-	};
+-
+ 	pcie: pcie@1e140000 {
+ 		compatible = "mediatek,mt7621-pci";
+ 		reg = <0x1e140000 0x100
+Index: src/linux/universal/linux-4.14/net/Kconfig
+===================================================================
+--- src/linux/universal/linux-4.14/net/Kconfig	(revision 53527)
++++ src/linux/universal/linux-4.14/net/Kconfig	(working copy)
+@@ -432,6 +432,31 @@
+ 	  Allows to run BPF programs as a nexthop action following a route
+ 	  lookup for incoming and outgoing packets.
+ 
++menuconfig HW_NAT
++	bool "HW NAT support"
++	---help---
++	 This feature provides a fast path to support network lan/wan nat.
++	 If you need hw_nat engine to reduce cpu loading, please say Y.
++
++	  Note that the answer to this question doesn't directly affect the
++	  kernel: saying N will just cause the configurator to skip all
++	  the questions about Mediatek Ethernet devices. If you say Y,
++	  you will be asked for your specific card in the following questions.
++if HW_NAT
++
++choice
++prompt "NAT Type"
++
++config  RA_NAT_NONE
++bool "None"
++config  RA_NAT_HW
++bool "Hardware"
++endchoice
++
++source "net/nat/hw_nat/Kconfig"
++
++endif # if HW_NAT
++
+ config DST_CACHE
+ 	bool
+ 	default n
+Index: src/linux/universal/linux-4.14/net/Makefile
+===================================================================
+--- src/linux/universal/linux-4.14/net/Makefile	(revision 53527)
++++ src/linux/universal/linux-4.14/net/Makefile	(working copy)
+@@ -73,16 +73,6 @@
+ obj-$(CONFIG_NFC)		+= nfc/
+ obj-$(CONFIG_PSAMPLE)		+= psample/
+ obj-$(CONFIG_NET_IFE)		+= ife/
+-ifeq ($(CONFIG_RAETH),y)
+-ifneq ($(CONFIG_RA_NAT_NONE),y)
+-obj-y                           += nat/foe_hook/
+-endif
+-endif
+-ifeq ($(CONFIG_RAETH),m)
+-ifneq ($(CONFIG_RA_NAT_NONE),y)
+-obj-y                           += nat/foe_hook/
+-endif
+-endif
+ obj-$(CONFIG_OPENVSWITCH)	+= openvswitch/
+ obj-$(CONFIG_VSOCKETS)	+= vmw_vsock/
+ obj-$(CONFIG_MPLS)		+= mpls/
+@@ -96,3 +86,7 @@
+ endif
+ obj-$(CONFIG_QRTR)		+= qrtr/
+ obj-$(CONFIG_NET_NCSI)		+= ncsi/
++ifeq ($(CONFIG_RA_NAT_HW),y)
++obj-y				+= nat/foe_hook/
++endif
++obj-$(CONFIG_RA_HW_NAT)		+= nat/hw_nat/
+Index: src/linux/universal/linux-4.14/drivers/net/ethernet/Kconfig
+===================================================================
+--- src/linux/universal/linux-4.14/drivers/net/ethernet/Kconfig	(revision 53527)
++++ src/linux/universal/linux-4.14/drivers/net/ethernet/Kconfig	(working copy)
+@@ -43,6 +43,7 @@
+ source "drivers/net/ethernet/chelsio/Kconfig"
+ source "drivers/net/ethernet/cirrus/Kconfig"
+ source "drivers/net/ethernet/cisco/Kconfig"
++source "drivers/net/ethernet/raeth/Kconfig"
+ 
+ config CX_ECAT
+ 	tristate "Beckhoff CX5020 EtherCAT master support"

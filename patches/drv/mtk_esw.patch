@@ -1,0 +1,42 @@
+Index: src/router/rc/rc.c
+===================================================================
+--- src/router/rc/rc.c	(revision 53494)
++++ src/router/rc/rc.c	(working copy)
+@@ -81,6 +81,7 @@
+ #ifdef HAVE_QTN
+ #include "qtn_monitor.c"
+ #endif
++#include "switch_mtk_esw.c"
+ #include "event.c"
+ #include "gratarp.c"
+ 
+@@ -281,6 +282,7 @@
+ #ifdef HAVE_QTN
+ 	{ "qtn_monitor", NULL, &qtn_monitor_main },
+ #endif
++	{ "mtk_esw", NULL, &mtk_esw_main },
+ 	{ "write", NULL, &write_main },
+ //	{ "startservice_f", NULL, &service_main },
+ //	{ "startservice", NULL, &service_main },
+Index: src/router/rc/Makefile
+===================================================================
+--- src/router/rc/Makefile	(revision 53494)
++++ src/router/rc/Makefile	(working copy)
+@@ -1103,6 +1103,9 @@
+ endif
+ endif
+ 
++CFLAGS += -DUSE_MTK_GSW
++CFLAGS += -I$(LINUXDIR)/drivers/net/ethernet/raeth
++
+ include $(TOP)/rules/generic.mk
+ 
+ CFLAGS += $(DD_CFLAGS)
+@@ -1234,6 +1237,7 @@
+ 	cd $(INSTALLDIR)/sbin && ln -sf rc gpio
+ 	cd $(INSTALLDIR)/sbin && ln -sf rc softwarerevision
+ 	cd $(INSTALLDIR)/sbin && ln -sf rc mtd
++	cd $(INSTALLDIR)/sbin && ln -sf rc mtk_esw
+ ifeq ($(CONFIG_GPIOWATCHER),y)
+ 	cd $(INSTALLDIR)/sbin && ln -sf rc gpiowatcher
+ endif

@@ -95,8 +95,17 @@ gen_patches:
 		svn diff src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882 \
 				src/linux/universal/linux-4.14/drivers/net/wireless/Makefile > $(TOP_DIR)/patches/drv/mt7615.patch; \
 		svn diff src/router/others/Makefile > $(TOP_DIR)/patches/drv/others.patch; \
+		svn diff src/router/rc/rc.c src/router/rc/Makefile > $(TOP_DIR)/patches/drv/mtk_esw.patch; \
 		svn diff src/linux/universal/linux-4.14/net/wireless/wext-core.c > $(TOP_DIR)/patches/drv/wext-core.patch; \
+		svn diff src/linux/universal/linux-4.14/dts/mt7621.dtsi \
+				src/linux/universal/linux-4.14/net/Kconfig \
+				src/linux/universal/linux-4.14/net/Makefile \
+				src/linux/universal/linux-4.14/drivers/net/ethernet/Kconfig > $(TOP_DIR)/patches/drv/hw_nat.patch; \
+		svn diff src/linux/universal/linux-4.14/net/ipv4/Kconfig \
+				src/linux/universal/linux-4.14/net/ipv4/Makefile > $(TOP_DIR)/patches/drv/inet_lro.patch; \
 		svn diff src/router/libutils/libwireless/wl.c > $(TOP_DIR)/patches/drv/libwireless.patch; \
+		svn diff src/router/services/sysinit/sysinit-rt2880.c > $(TOP_DIR)/patches/drv/sysinit.patch; \
+		svn diff src/router/services/Makefile > $(TOP_DIR)/patches/drv/switch_gsw.patch; \
 	)
 
 prepare:
@@ -112,7 +121,11 @@ ifeq ($(DRV),mt76)
 	cp $(TOP_DIR)/configs/kernel/.config $(LINUX_DIR)/.config
 else
 	$(call PatchDir,$(TOP_DIR)/patches/drv)
+	rm -rf $(LINUX_DIR)/drivers/net/ethernet/raeth
+	rm -rf $(LINUX_DIR)/net/nat/foe_hook
 	cp -r $(TOP_DIR)/files/linux/drivers $(LINUX_DIR)/
+	cp -r $(TOP_DIR)/files/linux/include $(LINUX_DIR)/
+	cp -r $(TOP_DIR)/files/linux/net $(LINUX_DIR)/
 	cp -r $(TOP_DIR)/files/router/* $(BUILD_DIR)/
 	cp $(TOP_DIR)/files/linux/dts/K2P_drv.dts $(LINUX_DIR)/dts/K2P.dts
 	cp $(TOP_DIR)/configs/kernel/.config_drv $(LINUX_DIR)/.config

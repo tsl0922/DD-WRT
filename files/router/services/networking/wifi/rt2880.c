@@ -1354,9 +1354,11 @@ void configure_wifi()
 	insmod("mt_wifi");
 
 	eval("ifconfig", "ra0", "up");
+	eval("iwpriv", "ra0", "set", "hw_nat_register=1");
 	init_network(0);
 
 	eval("ifconfig", "ba0", "up");
+	eval("iwpriv", "ba0", "set", "hw_nat_register=1");
 	init_network(1);
 
 	led_control(LED_WLAN, LED_ON);
