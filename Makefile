@@ -104,7 +104,6 @@ gen_patches:
 		svn diff src/linux/universal/linux-4.14/net/ipv4/Kconfig \
 				src/linux/universal/linux-4.14/net/ipv4/Makefile > $(TOP_DIR)/patches/drv/inet_lro.patch; \
 		svn diff src/router/libutils/libwireless/wl.c > $(TOP_DIR)/patches/drv/libwireless.patch; \
-		svn diff src/router/services/sysinit/sysinit-rt2880.c > $(TOP_DIR)/patches/drv/sysinit.patch; \
 		svn diff src/router/services/Makefile > $(TOP_DIR)/patches/drv/switch_gsw.patch; \
 	)
 
