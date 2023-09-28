@@ -1,6 +1,11 @@
 # DD-WRT
 
-dd-wrt build scripts and patches for PHICOMM K2P, with ethernet/wireless drivers from [padavan](https://github.com/tsl0922/padavan) and Hardware NAT over `WAN<->LAN/WLAN`.
+dd-wrt build scripts and patches for MT7621, with ethernet/wireless drivers from [padavan](https://github.com/tsl0922/padavan) and Hardware NAT over `WAN<->LAN/WLAN`.
+
+**Supported devices:**
+
+- [PHICOMM K2P](https://openwrt.org/toh/phicomm/k2p_ke2p)
+- [D-Link DIR-882 A1/R1](https://openwrt.org/toh/d-link/dir-882_a1)
 
 ## Prerequisites
 
@@ -17,19 +22,17 @@ sudo npm install -g uglify-js uglifycss
 
 ## Build Instructions
 
-1. extract [toolchain](https://github.com/tsl0922/DD-WRT/releases/tag/toolchain): `tar zxf toolchain-mipsel_24kc_gcc-13.1.0_musl.tar.gz`
-2. checkout code: `make checkout`
-3. prepare:
-    - to use [mt_wifi](https://github.com/tsl0922/padavan/tree/main/trunk/linux-4.4.x/drivers/net/wireless/mediatek) driver: `make prepare DRV=mt_wifi`
-    - to use [mt76](https://github.com/openwrt/mt76) driver: `make prepare DRV=mt76`
-3. build:
-    - `make configure`
-    - `make kernel`
-    - `make all`
-    - `make image`
+```
+tar zxf toolchain-mipsel_24kc_gcc-13.1.0_musl.tar.gz
+echo PROFILE=k2p > .config
+make checkout
+make prepare
+make configure
+make kernel
+make all
+make image
+```
 
-## References
+supported profiles are: `k2p k2p-mini k2p-mt76 dir-882`.
 
-- [PHICOMM K2P](https://openwrt.org/toh/phicomm/k2p_ke2p)
-- [mt7621_phicomm_k2p.dts](https://github.com/openwrt/openwrt/blob/main/target/linux/ramips/dts/mt7621_phicomm_k2p.dts)
-- [Mediatek Wi-Fi AP Software Programming Guide](https://mangopi.org/_media/mtk_wi-fi_softap_software_programming_guide_v4.6.pdf)
+`toolchain-mipsel_24kc_gcc-13.1.0_musl.tar.gz` can be downloaded from [release](https://github.com/tsl0922/DD-WRT/releases/tag/toolchain).

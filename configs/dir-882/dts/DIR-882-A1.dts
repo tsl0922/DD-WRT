@@ -1,0 +1,93 @@
+/dts-v1/;
+
+#include "mt7621.dtsi"
+
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+
+/ {
+	compatible = "dlink,dir-882-a1", "ralink,mt7621-soc";
+	model = "D-Link DIR-882 A1";
+
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x8000000>;
+	};
+};
+
+&spi0 {
+	status = "okay";
+	m25p80@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <10000000>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			partition@0 {
+				label = "u-boot";
+				reg = <0x0 0x30000>;
+			};
+
+			partition@30000 {
+				label = "u-boot-env";
+				reg = <0x30000 0x4000>;
+			};
+
+			factory: partition@40000 {
+				label = "factory";
+				reg = <0x40000 0x20000>;
+			};
+			partition@60000 {
+				compatible = "denx,uimage";
+				label = "linux";
+				reg = <0x60000 0xfa0000>;
+			};
+
+			partition@ff00000 {
+				label = "nvram";
+				reg = <0xff0000 0x10000>;
+			};
+			partition@0000000 {
+				label = "fullflash";
+				reg = <0x000000 0x1000000>;
+			};
+		};
+	};
+};
+
+&raeth {
+	status = "okay";
+	mac-address = [00 00 00 00 00 00];
+	gmac1-support = "rgmii-1";
+	rgmii-mode-1 = "force-1000";
+	gmac2-support = "rgmii-2";
+	rgmii-mode-2 = "force-1000";
+	gmac2-phy-address = <0>;
+	gmac1_txq_num = <1>;
+	gmac1_txq_txd_num = <1024>;
+	gmac2_txq_num = <1>;
+	gmac2_txq_txd_num = <1024>;
+	num_rx_desc = <1024>;
+};
+
+&pcie {
+	status = "okay";
+};
+
+&pinctrl {
+	state_default: pinctrl0 {
+		gpio {
+			ralink,group = "i2c", "uart2", "uart3", "rgmii2", "sdhci";
+			ralink,function = "gpio";
+		};
+	};
+};
+
+&xhci {
+	status = "okay";
+};
+

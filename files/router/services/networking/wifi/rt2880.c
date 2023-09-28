@@ -436,7 +436,9 @@ void gen_wifi_config(int idx)
 	FILE *fp = fopen(cname, "wb");	// config file for driver (don't ask me, its really the worst config thing i have seen)
 
 	fprintf(fp, "Default\n");
+#if defined(HAVE_K2P)
 	fprintf(fp, "DBDC_MODE=1\n");
+#endif
 	char wl[32];
 	sprintf(wl, "wl%d", idx);
 

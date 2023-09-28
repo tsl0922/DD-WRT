@@ -6,31 +6,12 @@
 #include <dt-bindings/input/input.h>
 
 / {
-	compatible = "phicomm,k2p", "ralink,mt7621-soc";
-	model = "Phicomm K2P";
+	compatible = "dlink,dir-882-r1", "ralink,mt7621-soc";
+	model = "D-Link DIR-882 R1";
 
 	memory@0 {
 		device_type = "memory";
 		reg = <0x0 0x8000000>;
-	};
-
-	leds {
-		compatible = "gpio-leds";
-
-		stat_r {
-			label = "red:status";
-			gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
-		};
-
-		stat_y {
-			label = "yellow:status";
-			gpios = <&gpio0 14 GPIO_ACTIVE_LOW>;
-		};
-
-		led_blue: stat_b {
-			label = "blue:status";
-			gpios = <&gpio0 15 GPIO_ACTIVE_LOW>;
-		};
 	};
 };
 
@@ -74,23 +55,27 @@
 				label = "fullflash";
 				reg = <0x000000 0x1000000>;
 			};
-
 		};
 	};
 };
 
+&raeth {
+	status = "okay";
+	mac-address = [00 00 00 00 00 00];
+	gmac1-support = "rgmii-1";
+	rgmii-mode-1 = "force-1000";
+	gmac2-support = "rgmii-2";
+	rgmii-mode-2 = "force-1000";
+	gmac2-phy-address = <0>;
+	gmac1_txq_num = <1>;
+	gmac1_txq_txd_num = <1024>;
+	gmac2_txq_num = <1>;
+	gmac2_txq_txd_num = <1024>;
+	num_rx_desc = <1024>;
+};
 
 &pcie {
 	status = "okay";
-};
-
-&pcie0 {
-	wifi@0,0 {
-		compatible = "mediatek,mt76";
-		reg = <0x0000 0 0 0 0>;
-		mediatek,mtd-eeprom = <&factory 0x0>;
-		mtd-mac-address = <&factory 0x4>;
-	};
 };
 
 &pinctrl {

@@ -1,27 +1,46 @@
 TOP_DIR:=$(CURDIR)
 
-DRV = mt76
-SVN = svn
+SVN := svn
+SRC_DIR := $(TOP_DIR)/dd-wrt
+BUILD_DIR := $(SRC_DIR)/src/router
+LINUX_DIR := $(SRC_DIR)/src/linux/universal/linux-4.14
+TOOLCHAIN_DIR := $(TOP_DIR)/toolchain-mipsel_24kc_gcc-13.1.0_musl
 
-SRC_DIR = $(TOP_DIR)/dd-wrt
-BUILD_DIR = $(SRC_DIR)/src/router
-LINUX_DIR = $(SRC_DIR)/src/linux/universal/linux-4.14
-TOOLCHAIN_DIR = $(TOP_DIR)/toolchain-mipsel_24kc_gcc-13.1.0_musl
+define DefineProfile
+  BOARD=$(1)
+  DTS=$(2)
+  CONFIG=$(3)
+  KCONFIG=$(4)
+endef
 
-MAKE_ROUTER = $(MAKE) -C $(BUILD_DIR) -f Makefile.mt7621
-PATH = $(TOOLCHAIN_DIR)/bin:$(TOP_DIR)/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ifneq ($(wildcard .config),)
+  include .config
+endif
 
-CRDA_URL = git://git.kernel.org/pub/scm/linux/kernel/git/sforshee/wireless-regdb.git
-PKGS = coova-chilli curl ebtables-2.0.9 filesharing hostapd-2018-07-08 inadynv2 \
+ifeq ($(PROFILE),k2p-mt76)
+  $(eval $(call DefineProfile,k2p,K2P-mt76,mt76.config,mt76.config))
+else ifeq ($(PROFILE),k2p)
+  $(eval $(call DefineProfile,k2p,K2P,.config,.config))
+else ifeq ($(PROFILE),k2p-mini)
+  $(eval $(call DefineProfile,k2p,K2P,mini.config,.config))
+else ifeq ($(PROFILE),dir-882-r1)
+  $(eval $(call DefineProfile,dir-882,DIR-882-R1,.config,.config))
+else ifeq ($(PROFILE),dir-882-a1)
+  $(eval $(call DefineProfile,dir-882,DIR-882-A1,.config,.config))
+else
+  $(error "Unknown PROFILE=$(PROFILE)")
+endif
+
+MAKE_ROUTER := $(MAKE) -C $(BUILD_DIR) -f Makefile.mt7621 BOARD=$(BOARD) DTS=$(DTS) RPROFILE=$(PROFILE)
+PATH := $(TOOLCHAIN_DIR)/bin:$(TOP_DIR)/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+CRDA_URL := git://git.kernel.org/pub/scm/linux/kernel/git/sforshee/wireless-regdb.git
+PKGS := coova-chilli curl ebtables-2.0.9 filesharing hostapd-2018-07-08 inadynv2 \
 	kromo l7 libevent libffi libucontext libmicrohttpd libnl-tiny lzma-loader \
-	$(if $(subst mt76,,$(DRV)),,mac80211 mac80211-rules) madwifi.dev \
+	$(if $(findstring mt76,$(PROFILE)),mac80211 mac80211-rules,) madwifi.dev \
 	misc rp-pppoe rules tools udhcpc usb_modeswitch util-linux 
 
 export PATH SVN
-
-define CopyConfig
-	cp $(TOP_DIR)/configs/$(if $(subst mt76,,$(1)),$(if $(subst mini,,$(1)),.config_drv,.config_mini),.config) $(BUILD_DIR)/.config
-endef
 
 define PatchDir
 	@if [ -d $(1) ] && [ "$$(ls $(1) | wc -l)" -gt 0 ]; then \
@@ -61,7 +80,7 @@ checkout:
 	done
 
 	cp $(TOP_DIR)/files/router/Makefile.mt7621 $(BUILD_DIR)/Makefile.mt7621
-	cp $(TOP_DIR)/configs/.config $(BUILD_DIR)/.config
+	cp $(TOP_DIR)/configs/$(BOARD)/$(subst mini,,$(CONFIG)) $(BUILD_DIR)/.config
 
 	$(MAKE_ROUTER) download
 
@@ -104,20 +123,18 @@ gen_patches:
 		svn diff src/linux/universal/linux-4.14/net/ipv4/Kconfig \
 				src/linux/universal/linux-4.14/net/ipv4/Makefile > $(TOP_DIR)/patches/drv/inet_lro.patch; \
 		svn diff src/router/libutils/libwireless/wl.c > $(TOP_DIR)/patches/drv/libwireless.patch; \
-		svn diff src/router/services/Makefile > $(TOP_DIR)/patches/drv/switch_gsw.patch; \
+		svn diff src/router/services/Makefile > $(TOP_DIR)/patches/drv/services.patch; \
 	)
 
 prepare:
 	$(call PatchDir,$(TOP_DIR)/patches)
-	$(call CopyConfig,$(DRV))
-ifeq ($(DRV),mt76)
+	$(call PatchDir,$(TOP_DIR)/patches/$(BOARD))
+ifneq (,$(findstring mt76,$(PROFILE)))
 	$(call PatchDir,$(TOP_DIR)/patches/mt76)
 	[ -d $(BUILD_DIR)/crda ] || git clone $(CRDA_URL) $(BUILD_DIR)/crda
 	echo "#!/bin/sh\n\necho crda called" > $(BUILD_DIR)/crda/crda.sh
 	chmod +x $(BUILD_DIR)/crda/crda.sh
 	ln -sf mac80211 $(BUILD_DIR)/compat-wireless
-	cp $(TOP_DIR)/files/linux/dts/K2P.dts $(LINUX_DIR)/dts/K2P.dts
-	cp $(TOP_DIR)/configs/kernel/.config $(LINUX_DIR)/.config
 else
 	$(call PatchDir,$(TOP_DIR)/patches/drv)
 	rm -rf $(LINUX_DIR)/drivers/net/ethernet/raeth
@@ -126,16 +143,16 @@ else
 	cp -r $(TOP_DIR)/files/linux/include $(LINUX_DIR)/
 	cp -r $(TOP_DIR)/files/linux/net $(LINUX_DIR)/
 	cp -r $(TOP_DIR)/files/router/* $(BUILD_DIR)/
-	cp $(TOP_DIR)/files/linux/dts/K2P_drv.dts $(LINUX_DIR)/dts/K2P.dts
-	cp $(TOP_DIR)/configs/kernel/.config_drv $(LINUX_DIR)/.config
 endif
+	cp $(TOP_DIR)/configs/$(BOARD)/dts/$(DTS).dts $(LINUX_DIR)/dts/$(DTS).dts
+	cp $(TOP_DIR)/configs/$(BOARD)/kernel/$(KCONFIG) $(LINUX_DIR)/.config
+	cp $(TOP_DIR)/configs/$(BOARD)/$(CONFIG) $(BUILD_DIR)/.config
 	ln -sf ../../opt $(BUILD_DIR)/opt
 	cp $(LINUX_DIR)/drivers/net/wireless/Kconfig.dir882 $(LINUX_DIR)/drivers/net/wireless/Kconfig
 
 	$(MAKE_ROUTER) gen_revision
 
 configure:
-ifneq ($(DRV),mini)
 	$(MAKE_ROUTER) ncurses-configure ncurses
 	$(MAKE_ROUTER) zlib-configure zlib
 	$(MAKE_ROUTER) libffi-configure libffi
@@ -143,10 +160,10 @@ ifneq ($(DRV),mini)
 	$(MAKE_ROUTER) libpcap-configure libpcap
 	$(MAKE_ROUTER) libucontext-configure libucontext
 	$(MAKE_ROUTER) openssl-configure openssl
+	$(MAKE_ROUTER) libevent-configure libevent
 	$(MAKE_ROUTER) curl-configure curl
 	$(MAKE_ROUTER) gmp-configure gmp
 	$(MAKE_ROUTER) wolfssl-configure wolfssl
-endif
 	$(MAKE_ROUTER) pcre-configure pcre
 	$(MAKE_ROUTER) nettle-configure nettle
 	$(MAKE_ROUTER) configure

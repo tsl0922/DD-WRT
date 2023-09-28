@@ -17,6 +17,16 @@ ifneq ($(wildcard ../cy_conf.mak),)
   include ../cy_conf.mak
 endif
 
+ifeq ($(BOARD),)
+  $(error "BOARD not set")
+endif
+ifeq ($(DTS),)
+  $(error "DTS not set")
+endif
+ifeq ($(RPROFILE),)
+  RPROFILE=$(BOARD)
+endif
+
 #
 # Paths
 #
@@ -232,12 +242,12 @@ endif
 		-I$(LINUXDIR)/arch/mips/boot/dts \
 		-I$(LINUXDIR)/arch/mips/boot/dts/include \
 		-I$(LINUXDIR)/include \
-		-o $(LINUXDIR)/dts/K2P.dtb.tmp \
-		$(LINUXDIR)/dts/K2P.dts
-	$(LINUXDIR)/scripts/dtc/dtc -i $(LINUXDIR)/dts/ -O dtb -o $(LINUXDIR)/dts/K2P.dtb $(LINUXDIR)/dts/K2P.dtb.tmp
+		-o $(LINUXDIR)/dts/$(DTS).dtb.tmp \
+		$(LINUXDIR)/dts/$(DTS).dts
+	$(LINUXDIR)/scripts/dtc/dtc -i $(LINUXDIR)/dts/ -O dtb -o $(LINUXDIR)/dts/$(DTS).dtb $(LINUXDIR)/dts/$(DTS).dtb.tmp
 
-	cp $(LINUXDIR)/vmlinux $(LINUXDIR)/vmlinux-mt7621-K2P
-	patch-dtb $(LINUXDIR)/vmlinux-mt7621-K2P $(LINUXDIR)/dts/K2P.dtb
+	cp $(LINUXDIR)/vmlinux $(LINUXDIR)/vmlinux-mt7621-$(BOARD)
+	patch-dtb $(LINUXDIR)/vmlinux-mt7621-$(BOARD) $(LINUXDIR)/dts/$(DTS).dtb
 
 include common.mk
 
@@ -345,7 +355,7 @@ endif
 		-root-owned -noappend -nopad -noI -no-xattrs -b 1M
 
 image:
-	$(CROSS_COMPILE)objcopy -O binary $(LINUXDIR)/vmlinux-mt7621-K2P $(PLATFORMDIR)/vmlinux.bin
+	$(CROSS_COMPILE)objcopy -O binary $(LINUXDIR)/vmlinux-mt7621-$(BOARD) $(PLATFORMDIR)/vmlinux.bin
 	lzma e -lc1 -lp2 -pb2 -d25 $(PLATFORMDIR)/vmlinux.bin $(PLATFORMDIR)/vmlinux.lzma
 	make -C lzma-loader/mt7621 clean
 	make -C lzma-loader/mt7621 LOADER_DATA=$(PLATFORMDIR)/vmlinux.lzma
@@ -354,13 +364,13 @@ image:
 		ENTRY=`readelf -h $(TOP)/lzma-loader/mt7621/loader.elf | grep "Entry" | awk '{print $$4}'`; \
 		mkimage -A mips -O linux -C none -T kernel \
 			-a 80001000 -e $$ENTRY -n "DIR_878_MT7621AT" \
-			-d $(TOP)/lzma-loader/mt7621/loader.bin root-mt7621_K2P.uimage; \
-		dd if=root-mt7621_K2P.uimage of=aligned-mt7621_K2P.uimage bs=64k conv=sync; \
-		cat root.fs >> aligned-mt7621_K2P.uimage; \
-		mv aligned-mt7621_K2P.uimage dd-wrt-v3.0-r$(SVN_REVISION)-k2p.bin
+			-d $(TOP)/lzma-loader/mt7621/loader.bin root-mt7621_$(BOARD).uimage; \
+		dd if=root-mt7621_$(BOARD).uimage of=aligned-mt7621_$(BOARD).uimage bs=64k conv=sync; \
+		cat root.fs >> aligned-mt7621_$(BOARD).uimage; \
+		mv aligned-mt7621_$(BOARD).uimage dd-wrt-v3.0-r$(SVN_REVISION)-$(RPROFILE).bin
 
 include rules/all.mk
 
 .PHONY: all clean distclean mrproper install package
 .PHONY: conf mconf oldconf kconf kmconf config menuconfig oldconfig
-.PHONY: dummy fixkc libnet libpcap libffi pcre zlib
+.PHONY: dummy fixkc libnet libpcap libffi pcre zlib zstd

@@ -15,12 +15,12 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        drv: [mt76, drv, mini]
+        profile: [k2p-mt76, k2p-mini, k2p, dir-882-a1, dir-882-r1]
     steps:
       - uses: actions/checkout@v3
       - uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ matrix.drv }}
+          key: ${{ matrix.profile }}
       - name: Install packages
         run: |
           sudo apt update
@@ -40,10 +40,11 @@ jobs:
           fileName: toolchain-mipsel_24kc_gcc-13.1.0_musl.tar.gz
       - name: Extract toolchain
         run: tar zxf toolchain-mipsel_24kc_gcc-13.1.0_musl.tar.gz
-      - name: Checkout
-        run: make checkout DRV=${{ matrix.drv }}
       - name: Prepare
-        run: make prepare DRV=${{ matrix.drv }}
+        run: |
+          echo PROFILE=${{ matrix.profile }} > .config
+          make checkout
+          make prepare
       - name: Configure
         run: make configure
       - name: Build kernel
@@ -52,13 +53,6 @@ jobs:
         run: make all
       - name: Build image
         run: make image
-      - name: Rename image
-        run: |
-          for f in images/*.bin; do
-            mv $f ${f/.bin/-$DRV.bin}
-          done
-        env:
-          DRV: "${{ matrix.drv }}"
       - uses: actions/upload-artifact@v3
         with:
           name: images

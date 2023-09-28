@@ -35,7 +35,7 @@ Index: src/router/others/Makefile
 -	install -d $(INSTALLDIR)/etc/wlan
 -	install rt2880/RT28*.bin $(INSTALLDIR)/etc/wlan
 +	install -d $(INSTALLDIR)/etc_ro/Wireless
-+	install rt2880/k2p/*.dat $(INSTALLDIR)/etc_ro/Wireless
++	install rt2880/$(BOARD)/*.dat $(INSTALLDIR)/etc_ro/Wireless
  endif
 -endif
  ifdef CONFIG_X86

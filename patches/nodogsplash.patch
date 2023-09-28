@@ -1,0 +1,13 @@
+Index: src/router/nodogsplash/Makefile
+===================================================================
+--- src/router/nodogsplash/Makefile	(revision 53548)
++++ src/router/nodogsplash/Makefile	(working copy)
+@@ -32,7 +32,7 @@
+ 
+ install:
+ #ifeq(yes,$(STRIP))
+-	strip nodogsplash
++#	strip nodogsplash
+ #	strip ndsctl
+ #endif
+ 	mkdir -p $(DESTDIR)/usr/bin/
