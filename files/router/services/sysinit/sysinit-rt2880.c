@@ -94,6 +94,8 @@ void start_sysinit(void)
 
 	insmod("hw_nat");
 
+	nvram_unset("sw_cpuport");
+
 	char eabuf[32];
 	if (get_hwaddr("eth2", eabuf)) {
 		nvram_set("et0macaddr_safe", eabuf);
