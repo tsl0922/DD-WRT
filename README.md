@@ -1,6 +1,6 @@
 # DD-WRT
 
-dd-wrt build scripts and patches for PHICOMM K2P.
+dd-wrt build scripts and patches for PHICOMM K2P, with ethernet/wireless drivers from [padavan](https://github.com/tsl0922/padavan) and Hardware NAT over `WAN<->LAN/WLAN`.
 
 ## Prerequisites
 
