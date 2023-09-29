@@ -247,7 +247,7 @@ struct pdma_rx_desc_info4 {
 	u16 SOURCE;
 	u16 DEST;
 #endif
-} __attribute__((__packed__));
+} __packed;
 
 struct head_rx_descinfo4 {
 	uint32_t foe_entry_num:14;
@@ -270,7 +270,7 @@ struct head_rx_descinfo4 {
 	u16 SOURCE;
 	u16 DEST;
 #endif
-} __attribute__((__packed__));
+} __packed;
 
 struct cb_rx_desc_info4 {
 	u16 MAGIC_TAG_PROTECT0;
@@ -293,7 +293,7 @@ struct cb_rx_desc_info4 {
 	u16 SOURCE;
 	u16 DEST;
 #endif
-} __attribute__((__packed__));
+} __packed;
 #ifndef NEXTHDR_IPIP
 #define NEXTHDR_IPIP 4
 #endif

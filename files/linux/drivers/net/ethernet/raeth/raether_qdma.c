@@ -1261,7 +1261,7 @@ int ei_qdma_start_xmit(struct sk_buff *skb, struct net_device *dev, int gmac_no)
 	}
 #endif
 
-	// dev->trans_start = jiffies;	/* save the timestamp */
+	netif_trans_update(dev); /* save the timestamp */
 	/*spin_lock_irqsave(&ei_local->page_lock, flags); */
 
 	/* check free_txd_num before calling rt288_eth_send() */

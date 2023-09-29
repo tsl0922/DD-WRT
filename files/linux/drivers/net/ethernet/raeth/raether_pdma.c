@@ -671,7 +671,7 @@ int ei_pdma_start_xmit(struct sk_buff *skb, struct net_device *dev, int gmac_no)
 	}
 #endif
 
-	// dev->trans_start = jiffies;	/* save the timestamp */
+	netif_trans_update(dev);	/* save the timestamp */
 	spin_lock(&ei_local->page_lock);
 	dma_sync_single_for_device(dev->dev.parent, virt_to_phys(skb->data),
 				   skb->len, DMA_TO_DEVICE);
