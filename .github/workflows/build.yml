@@ -47,12 +47,8 @@ jobs:
           make prepare
       - name: Configure
         run: make configure
-      - name: Build kernel
-        run: make kernel
-      - name: Build all
+      - name: Build
         run: make all
-      - name: Build image
-        run: make image
       - uses: actions/upload-artifact@v3
         with:
           name: images

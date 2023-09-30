@@ -255,14 +255,16 @@ endif
 		-I$(LINUXDIR)/include \
 		-o $(LINUXDIR)/dts/$(DTS).dtb.tmp \
 		$(LINUXDIR)/dts/$(DTS).dts
-	$(LINUXDIR)/scripts/dtc/dtc -i $(LINUXDIR)/dts/ -O dtb -o $(LINUXDIR)/dts/$(DTS).dtb $(LINUXDIR)/dts/$(DTS).dtb.tmp
+	$(LINUXDIR)/scripts/dtc/dtc -i $(LINUXDIR)/dts/ -O dtb \
+		-o $(LINUXDIR)/dts/$(DTS).dtb \
+		$(LINUXDIR)/dts/$(DTS).dtb.tmp
 
 	cp $(LINUXDIR)/vmlinux $(LINUXDIR)/vmlinux-mt7621-$(BOARD)
 	patch-dtb $(LINUXDIR)/vmlinux-mt7621-$(BOARD) $(LINUXDIR)/dts/$(DTS).dtb
 
 include common.mk
 
-install package: clean_target $(filter-out lib.$(ARCH)-install,$(obj-install))
+install: clean_target $(filter-out lib.$(ARCH)-install,$(obj-install))
 	install -d $(TARGETDIR)
 	for dir in $(wildcard $(patsubst %,$(INSTALLDIR)/%,$(obj-y))) ; do \
 	    (cd $${dir} && tar cpf - .) | (cd $(TARGETDIR) && tar xpf -) \

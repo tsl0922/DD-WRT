@@ -55,7 +55,12 @@ define PatchDir
 endef
 
 all:
+	$(MAKE_ROUTER) kernel
 	$(MAKE_ROUTER) all
+	$(MAKE_ROUTER) install
+	$(MAKE_ROUTER) image
+
+	mkdir -p images && cp $(BUILD_DIR)/mipsel-uclibc/dd-wrt-v3.0-*.bin images
 
 checkout:
 	-[ -d "$(SRC_DIR)" ] && svn cleanup $(SRC_DIR)
@@ -83,49 +88,6 @@ checkout:
 	cp $(TOP_DIR)/configs/$(BOARD)/$(subst mini,,$(CONFIG)) $(BUILD_DIR)/.config
 
 	$(MAKE_ROUTER) download
-
-gen_patches:
-	@(cd $(SRC_DIR); \
-		svn diff src/router/services/sysinit/devinit.c > $(TOP_DIR)/patches/devinit.patch; \
-		svn diff src/router/services/sysinit/defaults.c \
-				src/router/services/sysinit/sysinit.c > $(TOP_DIR)/patches/defaults.patch; \
-		svn diff src/router/glib20/libglib/gio/meson.build \
-				src/router/glib20/libglib/meson.build  > $(TOP_DIR)/patches/glib20.patch; \
-		svn diff src/router/httpd/visuals/menu.c \
-				src/router/httpd/visuals/dd-wrt.c > $(TOP_DIR)/patches/httpd.patch; \
-		svn diff src/router/libutils/libutils/detect.c \
-				src/router/libutils/libutils/gpio.c \
-				src/router/libutils/libutils/ledconfig.c \
-				src/router/rc/resetbutton.c > $(TOP_DIR)/patches/k2p.patch; \
-		svn diff src/router/kromo/dd-wrt/Makefile > $(TOP_DIR)/patches/kromo.patch; \
-		svn diff src/router/libpcap/gencode.c > $(TOP_DIR)/patches/libpcap.patch; \
-		svn diff src/router/libutils/Makefile \
-				src/router/libutils/libshutils/shutils.c > $(TOP_DIR)/patches/libutils.patch; \
-		svn diff src/router/mactelnet/Makefile > $(TOP_DIR)/patches/mactelnet.patch; \
-		svn diff src/router/ntfs3/Makefile > $(TOP_DIR)/patches/ntfs3.patch; \
-		svn diff src/router/olsrd/src/cfgparser/local.mk > $(TOP_DIR)/patches/olsrd.patch; \
-		svn diff src/router/rules > $(TOP_DIR)/patches/rules.patch; \
-		svn diff src/router/shared > $(TOP_DIR)/patches/shared.patch; \
-		svn diff src/router/vpnc/libgpg-error/src/Makefile.am \
-				src/router/vpnc/libgpg-error/src/Makefile.in \
-				src/router/vpnc/libgpg-error/src/mkstrtable.awk > $(TOP_DIR)/patches/vpnc.patch; \
-		svn diff src/router/mac80211/drivers/net/wireless/Kconfig \
-				src/router/mac80211/drivers/net/wireless/mediatek/mt76/Kconfig > $(TOP_DIR)/patches/mt76/mac80211.patch; \
-		svn diff src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882 \
-				src/linux/universal/linux-4.14/drivers/net/wireless/Makefile > $(TOP_DIR)/patches/drv/mt7615.patch; \
-		svn diff src/router/others/Makefile > $(TOP_DIR)/patches/drv/others.patch; \
-		svn diff src/router/rc/rc.c src/router/rc/Makefile > $(TOP_DIR)/patches/drv/mtk_esw.patch; \
-		svn diff src/linux/universal/linux-4.14/net/wireless/wext-core.c > $(TOP_DIR)/patches/drv/wext-core.patch; \
-		svn diff src/linux/universal/linux-4.14/dts/mt7621.dtsi \
-				src/linux/universal/linux-4.14/net/Kconfig \
-				src/linux/universal/linux-4.14/net/Makefile \
-				src/linux/universal/linux-4.14/drivers/net/ethernet/Kconfig > $(TOP_DIR)/patches/drv/hw_nat.patch; \
-		svn diff src/linux/universal/linux-4.14/net/ipv4/Kconfig \
-				src/linux/universal/linux-4.14/net/ipv4/Makefile > $(TOP_DIR)/patches/drv/inet_lro.patch; \
-		svn diff src/linux/universal/linux-4.14/include/linux/serial_core.h > $(TOP_DIR)/patches/serial.patch; \
-		svn diff src/router/libutils/libwireless/wl.c > $(TOP_DIR)/patches/drv/libwireless.patch; \
-		svn diff src/router/services/Makefile > $(TOP_DIR)/patches/drv/services.patch; \
-	)
 
 prepare:
 	$(call PatchDir,$(TOP_DIR)/patches)
@@ -169,17 +131,55 @@ configure:
 	$(MAKE_ROUTER) nettle-configure nettle
 	$(MAKE_ROUTER) configure
 
-image:
-	$(MAKE_ROUTER) install
-	$(MAKE_ROUTER) image
-	mkdir -p images && cp $(BUILD_DIR)/mipsel-uclibc/dd-wrt-v3.0-*.bin images
-
 httpd:
 	$(MAKE_ROUTER) libutils-clean libutils
 	$(MAKE_ROUTER) rc-clean rc
 	$(MAKE_ROUTER) services-clean services
 	$(MAKE_ROUTER) language routerstyle
 	$(MAKE_ROUTER) httpd-clean httpd
+
+gen_patches:
+	@(cd $(SRC_DIR); \
+		svn diff src/router/services/sysinit/defaults.c \
+				src/router/services/sysinit/sysinit.c > $(TOP_DIR)/patches/k2p/defaults.patch; \
+		svn diff src/router/libutils/libutils/detect.c \
+				src/router/libutils/libutils/gpio.c \
+				src/router/libutils/libutils/ledconfig.c \
+				src/router/rc/resetbutton.c > $(TOP_DIR)/patches/k2p/k2p.patch; \
+		svn diff src/router/kromo/dd-wrt/Makefile > $(TOP_DIR)/patches/k2p/kromo.patch; \
+		svn diff src/router/services/sysinit/devinit.c > $(TOP_DIR)/patches/devinit.patch; \
+		svn diff src/router/glib20/libglib/gio/meson.build \
+				src/router/glib20/libglib/meson.build  > $(TOP_DIR)/patches/glib20.patch; \
+		svn diff src/router/httpd/visuals/menu.c \
+				src/router/httpd/visuals/dd-wrt.c > $(TOP_DIR)/patches/httpd.patch; \
+		svn diff src/router/libpcap/gencode.c > $(TOP_DIR)/patches/libpcap.patch; \
+		svn diff src/router/libutils/Makefile \
+				src/router/libutils/libshutils/shutils.c > $(TOP_DIR)/patches/libutils.patch; \
+		svn diff src/router/mactelnet/Makefile > $(TOP_DIR)/patches/mactelnet.patch; \
+		svn diff src/router/ntfs3/Makefile > $(TOP_DIR)/patches/ntfs3.patch; \
+		svn diff src/router/olsrd/src/cfgparser/local.mk > $(TOP_DIR)/patches/olsrd.patch; \
+		svn diff src/router/rules > $(TOP_DIR)/patches/rules.patch; \
+		svn diff src/router/shared > $(TOP_DIR)/patches/shared.patch; \
+		svn diff src/router/vpnc/libgpg-error/src/Makefile.am \
+				src/router/vpnc/libgpg-error/src/Makefile.in \
+				src/router/vpnc/libgpg-error/src/mkstrtable.awk > $(TOP_DIR)/patches/vpnc.patch; \
+		svn diff src/router/mac80211/drivers/net/wireless/Kconfig \
+				src/router/mac80211/drivers/net/wireless/mediatek/mt76/Kconfig > $(TOP_DIR)/patches/mt76/mac80211.patch; \
+		svn diff src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882 \
+				src/linux/universal/linux-4.14/drivers/net/wireless/Makefile > $(TOP_DIR)/patches/drv/mt7615.patch; \
+		svn diff src/router/others/Makefile > $(TOP_DIR)/patches/drv/others.patch; \
+		svn diff src/router/rc/rc.c src/router/rc/Makefile > $(TOP_DIR)/patches/drv/mtk_esw.patch; \
+		svn diff src/linux/universal/linux-4.14/net/wireless/wext-core.c > $(TOP_DIR)/patches/drv/wext-core.patch; \
+		svn diff src/linux/universal/linux-4.14/dts/mt7621.dtsi \
+				src/linux/universal/linux-4.14/net/Kconfig \
+				src/linux/universal/linux-4.14/net/Makefile \
+				src/linux/universal/linux-4.14/drivers/net/ethernet/Kconfig > $(TOP_DIR)/patches/drv/hw_nat.patch; \
+		svn diff src/linux/universal/linux-4.14/net/ipv4/Kconfig \
+				src/linux/universal/linux-4.14/net/ipv4/Makefile > $(TOP_DIR)/patches/drv/inet_lro.patch; \
+		svn diff src/linux/universal/linux-4.14/include/linux/serial_core.h > $(TOP_DIR)/patches/serial.patch; \
+		svn diff src/router/libutils/libwireless/wl.c > $(TOP_DIR)/patches/drv/libwireless.patch; \
+		svn diff src/router/services/Makefile > $(TOP_DIR)/patches/drv/services.patch; \
+	)
 
 %:
 	$(MAKE_ROUTER) $*

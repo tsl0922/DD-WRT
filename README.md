@@ -28,11 +28,9 @@ echo PROFILE=k2p > .config
 make checkout
 make prepare
 make configure
-make kernel
 make all
-make image
 ```
 
-supported profiles are: `k2p k2p-mini k2p-mt76 dir-882`.
+supported profiles are: `k2p k2p-mini k2p-mt76 dir-882-a1 dir-882-r1`.
 
 `toolchain-mipsel_24kc_gcc-13.1.0_musl.tar.gz` can be downloaded from [release](https://github.com/tsl0922/DD-WRT/releases/tag/toolchain).
