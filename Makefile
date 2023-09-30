@@ -122,6 +122,7 @@ gen_patches:
 				src/linux/universal/linux-4.14/drivers/net/ethernet/Kconfig > $(TOP_DIR)/patches/drv/hw_nat.patch; \
 		svn diff src/linux/universal/linux-4.14/net/ipv4/Kconfig \
 				src/linux/universal/linux-4.14/net/ipv4/Makefile > $(TOP_DIR)/patches/drv/inet_lro.patch; \
+		svn diff src/linux/universal/linux-4.14/include/linux/serial_core.h > $(TOP_DIR)/patches/serial.patch; \
 		svn diff src/router/libutils/libwireless/wl.c > $(TOP_DIR)/patches/drv/libwireless.patch; \
 		svn diff src/router/services/Makefile > $(TOP_DIR)/patches/drv/services.patch; \
 	)

@@ -1,0 +1,12 @@
+Index: src/linux/universal/linux-4.14/include/linux/serial_core.h
+===================================================================
+--- src/linux/universal/linux-4.14/include/linux/serial_core.h	(revision 53548)
++++ src/linux/universal/linux-4.14/include/linux/serial_core.h	(working copy)
+@@ -91,6 +91,7 @@
+ 	int		(*verify_port)(struct uart_port *, struct serial_struct *);
+ 	int		(*ioctl)(struct uart_port *, unsigned int, unsigned long);
+ #ifdef CONFIG_CONSOLE_POLL
++	int		(*poll_init)(struct uart_port *);
+ 	void	(*poll_put_char)(struct uart_port *, unsigned char);
+ 	int		(*poll_get_char)(struct uart_port *);
+ #endif
