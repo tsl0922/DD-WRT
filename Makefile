@@ -165,6 +165,7 @@ gen_patches:
 				src/router/vpnc/libgpg-error/src/mkstrtable.awk > $(TOP_DIR)/patches/vpnc.patch; \
 		svn diff src/router/mac80211/drivers/net/wireless/Kconfig \
 				src/router/mac80211/drivers/net/wireless/mediatek/mt76/Kconfig > $(TOP_DIR)/patches/mt76/mac80211.patch; \
+		svn diff src/router/mac80211/drivers/net/wireless/mediatek/mt76 > $(TOP_DIR)/patches/mt76/mt76.patch; \
 		svn diff src/linux/universal/linux-4.14/drivers/net/wireless/Kconfig.dir882 \
 				src/linux/universal/linux-4.14/drivers/net/wireless/Makefile > $(TOP_DIR)/patches/drv/mt7615.patch; \
 		svn diff src/router/others/Makefile > $(TOP_DIR)/patches/drv/others.patch; \
