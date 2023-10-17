@@ -36,6 +36,7 @@ jobs:
         run: sudo npm install -g uglify-js uglifycss
       - uses: robinraju/release-downloader@v1.8
         with:
+          repository: tsl0922/DD-WRT
           tag: toolchain
           fileName: toolchain-mipsel_24kc_gcc-13.1.0_musl.tar.gz
       - name: Extract toolchain
