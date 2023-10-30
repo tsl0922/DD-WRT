@@ -38,7 +38,7 @@ CRDA_URL := git://git.kernel.org/pub/scm/linux/kernel/git/sforshee/wireless-regd
 PKGS := coova-chilli curl ebtables-2.0.9 filesharing hostapd-2018-07-08 inadynv2 \
 	kromo l7 libevent libffi libucontext libmicrohttpd libnl-tiny lzma-loader \
 	$(if $(findstring mt76,$(PROFILE)),mac80211 mac80211-rules,) madwifi.dev \
-	misc rp-pppoe rules tools udhcpc usb_modeswitch util-linux 
+	misc ovpn-dco rp-pppoe rules tools udhcpc usb_modeswitch util-linux
 
 export PATH SVN
 
