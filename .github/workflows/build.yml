@@ -8,7 +8,7 @@ on:
         required: true
         type: boolean
   schedule:
-    - cron: '30 21 * * *'
+    - cron: '30 21 * * 1'
 
 jobs:
   build:
