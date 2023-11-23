@@ -2,6 +2,9 @@ TOP_DIR:=$(CURDIR)
 
 SVN := svn
 SRC_DIR := $(TOP_DIR)/dd-wrt
+SRC_URL := svn://svn.dd-wrt.com/DD-WRT
+REVISION := HEAD
+
 BUILD_DIR := $(SRC_DIR)/src/router
 LINUX_DIR := $(SRC_DIR)/src/linux/universal/linux-4.14
 TOOLCHAIN_DIR := $(TOP_DIR)/toolchain-mipsel_24kc_gcc-13.1.0_musl
@@ -33,12 +36,8 @@ endif
 
 MAKE_ROUTER := $(MAKE) -C $(BUILD_DIR) -f Makefile.mt7621 BOARD=$(BOARD) DTS=$(DTS) RPROFILE=$(PROFILE)
 PATH := $(TOOLCHAIN_DIR)/bin:$(TOP_DIR)/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
+KERNEL := universal/linux-4.14
 CRDA_URL := git://git.kernel.org/pub/scm/linux/kernel/git/sforshee/wireless-regdb.git
-PKGS := coova-chilli curl ebtables-2.0.9 filesharing hostapd-2018-07-08 inadynv2 \
-	kromo l7 libevent libffi libucontext libmicrohttpd libnl-tiny lzma-loader \
-	$(if $(findstring mt76,$(PROFILE)),mac80211 mac80211-rules,) madwifi.dev \
-	misc ovpn-dco rp-pppoe rules tools udhcpc usb_modeswitch util-linux
 
 export PATH SVN
 
@@ -64,30 +63,25 @@ all:
 
 checkout:
 	-[ -d "$(SRC_DIR)" ] && svn cleanup $(SRC_DIR)
-	$(SVN) co svn://svn.dd-wrt.com/DD-WRT $(SRC_DIR) --depth immediates --quiet
+	$(SVN) co $(SRC_URL) -r $(REVISION) $(SRC_DIR) --depth immediates --quiet
 	@for d1 in $$($(SVN) ls $(SRC_DIR) | grep '/$$'); do \
 		[ "$$d1" = "ar5315_microredboot/" -o "$$d1" = "redboot/" ] && continue; \
 		echo "== Updating $$d1"; \
-		$(SVN) up $(SRC_DIR)/$$d1 --set-depth immediates --quiet; \
+		$(SVN) up -r $(REVISION) $(SRC_DIR)/$$d1 --set-depth immediates --quiet; \
 		for d2 in $$($(SVN) ls $(SRC_DIR)/$$d1 | grep '/$$'); do \
 			echo "== Updating $$d1$$d2"; \
-			if [ "$$d1$$d2" = "src/linux/" -o "$$d1$$d2" = "src/router/" ]; then \
-				$(SVN) up $(SRC_DIR)/$$d1$$d2 --set-depth immediates --quiet; \
+			if [ "$$d1$$d2" = "src/linux/" ]; then \
+				$(SVN) up -r $(REVISION) $(SRC_DIR)/$$d1$$d2 --set-depth immediates --quiet; \
 			else \
-				$(SVN) up $(SRC_DIR)/$$d1$$d2 --set-depth infinity --quiet; \
+				$(SVN) up -r $(REVISION) $(SRC_DIR)/$$d1$$d2 --set-depth infinity --quiet; \
 			fi; \
 		done; \
 	done
 
-	@for dir in $(PKGS); do \
-		echo "== Updating src/router/$$dir"; \
-		$(SVN) up $(SRC_DIR)/src/router/$$dir --set-depth infinity --quiet; \
-	done
+	$(SVN) up -r $(REVISION) $(SRC_DIR)/src/linux/$(KERNEL) --set-depth infinity --quiet
 
 	cp $(TOP_DIR)/files/router/Makefile.mt7621 $(BUILD_DIR)/Makefile.mt7621
 	cp $(TOP_DIR)/configs/$(BOARD)/$(subst mini,,$(CONFIG)) $(BUILD_DIR)/.config
-
-	$(MAKE_ROUTER) download
 
 prepare:
 	$(call PatchDir,$(TOP_DIR)/patches)

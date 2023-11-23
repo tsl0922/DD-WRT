@@ -3,12 +3,14 @@ name: build
 on: 
   workflow_dispatch:
     inputs:
+      revision:
+        description: 'svn revision'
+        required: true
+        default: 'HEAD'
       publish:
         description: 'publish build result to a release'
         required: true
         type: boolean
-  schedule:
-    - cron: '30 21 * * 1'
 
 jobs:
   build:
@@ -26,8 +28,8 @@ jobs:
           sudo apt update
           sudo apt install unzip libtool-bin ccache curl cmake gperf gawk flex bison nano xxd \
             fakeroot kmod cpio bc zip git python3-docutils gettext gengetopt gtk-doc-tools \
-            automake autopoint meson texinfo build-essential help2man pkg-config zlib1g-dev \
-            libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin
+            autoconf-archive automake autopoint meson texinfo build-essential help2man pkg-config \
+            zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin
       - uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -44,6 +46,7 @@ jobs:
       - name: Prepare
         run: |
           echo PROFILE=${{ matrix.profile }} > .config
+          echo REVISION=${{ github.event.inputs.revision }} >> .config
           make checkout
           make prepare
       - name: Configure

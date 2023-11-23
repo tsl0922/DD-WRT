@@ -118,28 +118,6 @@ gen_revision:
 
 include kernel-features.mk
 
-define Download
-  $(1)-download:
-	@if [ -d $(1) ]; then \
-		echo "== Updating $(1)"; \
-		$(SVN) up $(1) --set-depth infinity --quiet; \
-	fi
-endef
-
-obj-deps=$(foreach obj,$(obj-y), \
-	$(shell grep '^$(obj):' rules/*.mk | awk -F: '{print $$3}' | sed 's/\$$\(.\+\)//g' || true))
-obj-download=$(sort $(obj-deps) $(obj-y))
-
-$(foreach obj,$(obj-download),$(eval $(call Download,$(obj))))
-
-download: $(patsubst %,%-download,$(obj-download)) kernel-download
-
-kernel-download:
-	@ if [ ! -d $(LINUXDIR) ]; then \
-		echo "== Updating linux-$(KERNELVERSION)"; \
-		$(SVN) up $(LINUXDIR) --set-depth infinity --quiet; \
-	fi
-
 kernel:
 	$(kernelfeatures)
 ifeq ($(CONFIG_DEBUG_KERNEL),y)

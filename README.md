@@ -14,8 +14,8 @@ Ubuntu-22.04
 ```bash
 sudo apt install unzip libtool-bin ccache curl cmake gperf gawk flex bison nano xxd \
     fakeroot kmod cpio bc zip git python3-docutils gettext gengetopt gtk-doc-tools \
-    automake autopoint meson texinfo build-essential help2man pkg-config zlib1g-dev \
-    libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin
+    autoconf-archive automake autopoint meson texinfo build-essential help2man pkg-config \
+    zlib1g-dev libgmp3-dev libmpc-dev libmpfr-dev libncurses5-dev libltdl-dev wget libc-dev-bin
 sudo apt install npm
 sudo npm install -g uglify-js uglifycss
 ```
